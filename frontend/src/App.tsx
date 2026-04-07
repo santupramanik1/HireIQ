@@ -1,5 +1,5 @@
+import LayoutPage from "./app/LayoutPage";
+
 export const App = () => {
-  return (
-    <div>App</div>
-  )
-}
+    return <LayoutPage></LayoutPage>;
+};
