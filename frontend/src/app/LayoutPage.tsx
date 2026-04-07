@@ -1,12 +1,12 @@
+import CTASection from "../components/ui/CTASection";
+import FeaturesSection from "../components/ui/FeaturesSection";
+import Footer from "../components/ui/Footer";
+import GlobalStyles from "../components/ui/GlobalStyles";
+import HeroSection from "../components/ui/HeroSection";
+import HowItWorks from "../components/ui/HowItWorks";
+import Navbar from "../components/ui/Navbar";
+import StatsBar from "../components/ui/StatsBar";
 
-import CTASection from "../components/CTASection";
-import FeaturesSection from "../components/FeaturesSection";
-import Footer from "../components/Footer";
-import GlobalStyles from "../components/GlobalStyles";
-import HeroSection from "../components/HeroSection";
-import HowItWorks from "../components/HowItWorks";
-import Navbar from "../components/Navbar";
-import StatsBar from "../components/StatsBar";
 
 export default function LayoutPage() {
   return (
