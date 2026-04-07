@@ -35,7 +35,7 @@ export default function Navbar() {
             <Mic size={18} className="text-white" />
           </div>
           <span className="font-['Syne',sans-serif] font-extrabold text-[1.1rem] text-white tracking-tight">
-            VoiceRecruit<span className="text-[#a78bfa]">AI</span>
+            HireIQ<span className="text-[#a78bfa]">AI</span>
           </span>
         </a>
 
@@ -60,8 +60,8 @@ export default function Navbar() {
           >
             Sign in
           </a>
-          <button className="hidden md:flex bg-[#6c63ff] hover:bg-[#5b54e6] text-white px-5 py-2.5 rounded-full text-sm font-medium transition-colors items-center gap-2">
-            Start Free Trial
+          <button className="cursor-pointer hidden md:flex bg-[#6c63ff] hover:bg-[#5b54e6] text-white px-5 py-2.5 rounded-full text-sm font-medium transition-colors items-center gap-2">
+           Dashboard
           </button>
           
           <button

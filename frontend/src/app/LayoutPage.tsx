@@ -1,6 +1,7 @@
 
 import CTASection from "../components/CTASection";
 import FeaturesSection from "../components/FeaturesSection";
+import Footer from "../components/Footer";
 import GlobalStyles from "../components/GlobalStyles";
 import HeroSection from "../components/HeroSection";
 import HowItWorks from "../components/HowItWorks";
@@ -17,7 +18,7 @@ export default function LayoutPage() {
       <FeaturesSection />
       <HowItWorks />
       <CTASection />
-      {/* <Footer /> */}
+      <Footer />
     </main>
   );
 }
