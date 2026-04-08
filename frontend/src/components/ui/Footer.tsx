@@ -129,7 +129,7 @@ export default function Footer() {
         </div>
         <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-white/30 text-xs text-center sm:text-left">
-            © 2025 HireIQ AI, Inc. All rights reserved.
+            © 2026 HireIQ AI, Inc. All rights reserved.
           </p>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-green-500" />

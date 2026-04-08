@@ -10,7 +10,7 @@ import StatsBar from "../components/ui/StatsBar";
 
 export default function LayoutPage() {
   return (
-    <main className="bg-[#05070f] min-h-screen font-sans selection:bg-[#6c63ff]/30 selection:text-white">
+    <main className="bg-[#05070f] min-h-screen font-sans selection:bg-[#6c63ff]/30 selection:text-white relative">
       <GlobalStyles />
       <Navbar />
       <HeroSection />

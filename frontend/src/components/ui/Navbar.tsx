@@ -1,12 +1,12 @@
 "use client";
-import  { useState, useEffect } from "react";
-import { Mic, Menu, X } from "lucide-react"; // Only imported what Navbar needs
+import { useState, useEffect } from "react";
+import { Mic, Menu, X } from "lucide-react";
+import LoginModel from "../auth/LoginModel";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-
-
+  const [loginModelOpen, setLoginModelOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -28,7 +28,7 @@ export default function Navbar() {
           : "bg-transparent border-transparent py-5"
       }`}
     >
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <div className="max-w-7xl mx-auto flex items-center justify-between border-b border-transparent">
         {/* Logo */}
         <a href="/" className="flex items-center gap-2.5 no-underline">
           <div className="w-9 h-9 rounded-xl bg-linear-to-br from-[#6c63ff] to-[#9b59b6] flex items-center justify-center shadow-[0_0_16px_rgba(108,99,255,0.5)]">
@@ -54,19 +54,27 @@ export default function Navbar() {
 
         {/* CTA & Mobile Toggle */}
         <div className="flex items-center gap-4">
-          <a
-            href="#"
-            className="hidden md:block text-white/65 hover:text-white text-sm font-medium transition-colors"
-          >
-            Sign in
-          </a>
+          
+          {/* WRAPPER FOR DESKTOP SIGN IN & MODAL */}
+          <div className="relative hidden md:block">
+            <button
+              onClick={() => setLoginModelOpen(!loginModelOpen)}
+              className="text-white/65 hover:text-white text-sm font-medium transition-colors cursor-pointer py-2"
+            >
+              Sign in
+            </button>
+            
+            {/* Desktop Modal anchored to this button */}
+            {loginModelOpen && <LoginModel />}
+          </div>
+
           <button className="cursor-pointer hidden md:flex bg-[#6c63ff] hover:bg-[#5b54e6] text-white px-5 py-2.5 rounded-full text-sm font-medium transition-colors items-center gap-2">
-           Dashboard
+            Dashboard
           </button>
           
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-1 text-white"
+            className="md:hidden p-1 text-white cursor-pointer"
           >
             {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -87,7 +95,21 @@ export default function Navbar() {
             </a>
           ))}
           <div className="h-px bg-white/10 my-2" />
-          <button className="bg-[#6c63ff] text-white px-5 py-3 rounded-xl text-base font-medium w-full text-center">
+          
+          {/* WRAPPER FOR MOBILE SIGN IN & MODAL */}
+          <div className="relative flex flex-col items-center w-full">
+            <button
+              onClick={() => setLoginModelOpen(!loginModelOpen)}
+              className="text-white/70 hover:text-white text-base font-medium py-2 w-full text-center cursor-pointer mb-2"
+            >
+              Sign in
+            </button>
+            
+            {/* Mobile Modal anchored inside the menu */}
+            {loginModelOpen && <LoginModel />}
+          </div>
+
+          <button className="bg-[#6c63ff] hover:bg-[#5b54e6] transition-colors text-white px-5 py-3 rounded-xl text-base font-medium w-full text-center cursor-pointer">
             Start Free Trial
           </button>
         </div>
