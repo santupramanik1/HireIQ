@@ -6,7 +6,6 @@ export const connDB = async () => {
     dns.setServers(["1.1.1.1"]);
     try {
         const uri = process.env.MONGODB_URI;
-        console.log(uri)
         if (!uri) {
             throw new Error("MongoDB_URI  is not defined in .env");
         }
