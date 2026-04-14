@@ -83,12 +83,12 @@ export const googleCallback = async (req: Request, res: Response) => {
         const refreshToken = generateRefreshToken(payload);
 
         // STORE REFRESH TOKEN IN COOKIE
-        res.cookie("refreshToken",refreshToken,{
-            httpOnly:true,
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
             path: "/api/auth/refresh-token", // Only sent to the refresh route
             maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-        })
-        
+        });
+
         //  Cleanup and Response
         res.clearCookie("google_oauth_state");
         res.clearCookie("google_code_verifier");
@@ -121,7 +121,6 @@ export const refreshTokenController = async (req: Request, res: Response) => {
         return res.status(401).json({message: "Refresh token is required"});
     }
 
-    // Verify the refresh token
     try {
         // Verify it
         const decode = verifyRefreshToken(refreshToken);
@@ -137,6 +136,6 @@ export const refreshTokenController = async (req: Request, res: Response) => {
 };
 
 // Dummy profile
-export const getUserProfile=async(req:Request,res:Response)=>{
-    return res.json({success:true,"message":"hello santu"})
-}
+export const getUserProfile = async (req: Request, res: Response) => {
+    return res.json({success: true, message: "hello santu"});
+};
