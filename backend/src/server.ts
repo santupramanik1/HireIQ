@@ -5,6 +5,7 @@ import express, { type Request, type Response } from "express";
 import { connDB } from "./config/db.js";
 import cookieParser from "cookie-parser";
 import userRouter from "./routes/user.routes.js";
+import jobRouter from "./routes/job.routes.js";
 
 
 
@@ -17,6 +18,7 @@ app.use(cookieParser())
 
 // Routing
 app.use("/api/auth",userRouter)
+app.use("/api/job",jobRouter)
 
 
 
