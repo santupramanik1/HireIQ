@@ -1,5 +1,5 @@
 import express from "express"
-import { createJob } from "../controllers/job/job.controller.js"
+import { createJob, deleteJob, getJobs, updateJob } from "../controllers/job/job.controller.js"
 import { isAuthenticated } from "../middlewares/auth.middleware.js"
 const jobRouter=express.Router()
 
@@ -7,5 +7,8 @@ const jobRouter=express.Router()
 jobRouter.use(isAuthenticated)
 
 jobRouter.post("/create",createJob)
+jobRouter.put("/update/:id",updateJob)
+jobRouter.delete("/delete/:id",deleteJob)
+jobRouter.get("/get",getJobs)
 
 export default jobRouter
