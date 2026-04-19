@@ -6,6 +6,7 @@ import { connDB } from "./config/db.js";
 import cookieParser from "cookie-parser";
 import userRouter from "./routes/user.routes.js";
 import jobRouter from "./routes/job.routes.js";
+import applyRouter from "./routes/public.routes.js";
 
 
 
@@ -17,9 +18,14 @@ app.use(express.urlencoded({extended:true}))
 app.use(cookieParser())
 
 // Routing
+// Authentication
 app.use("/api/auth",userRouter)
-app.use("/api/job",jobRouter)
 
+// Job management
+app.use("/api/jobs",jobRouter)
+
+// Candidate apply
+app.use("/api/jobs",applyRouter)
 
 
 

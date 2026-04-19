@@ -12,4 +12,6 @@ userRouter.post("/refresh-token",refreshTokenController)
 // Protected Route
 userRouter.get("/profile",isAuthenticated,getUserProfile)
 
+
+
 export default userRouter

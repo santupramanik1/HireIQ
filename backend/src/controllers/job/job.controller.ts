@@ -1,7 +1,8 @@
 import type { Request, Response } from "express";
 import { Job } from "../../models/job/job.model.js";
+import { send_email } from "../../utils/email.js";
 
-// CREATE A NEW JOB
+//PRIVATE: CREATE A NEW JOB
 export const createJob = async (req: Request, res: Response) => {
   try {
     // Ensure user is authenticated(handled by JWT middleware ,but good to double-check)
@@ -12,7 +13,7 @@ export const createJob = async (req: Request, res: Response) => {
     // Attach the recruiter's ID to the job data
     const jobData = {
       ...req.body,
-      createdBy: req.user?.userId
+      createdBy: req.user?.userId,
     };
 
     const newJob = new Job(jobData);
@@ -21,21 +22,21 @@ export const createJob = async (req: Request, res: Response) => {
     return res.status(201).json({
       success: true,
       message: "Job created successfully",
-      job: newJob
+      job: newJob,
     });
   } catch (error: any) {
     // Check if the error is mongoose validation error
     if (error.name === "ValidationError") {
       // Extract all custom error message that is defined in the schema
       const validationErrors = Object.values(error.errors).map(
-        (err: any) => err.message
+        (err: any) => err.message,
       );
 
       // Send a 400 Bad Request response with the exact messages
       return res.status(400).json({
         success: false,
         message: "validation failed",
-        errors: validationErrors
+        errors: validationErrors,
       });
     }
 
@@ -43,12 +44,12 @@ export const createJob = async (req: Request, res: Response) => {
     console.error("Unexpected error creating job:", error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error"
+      message: "Internal Server Error",
     });
   }
 };
 
-// UPDATE THE EXISTING JOB BY JOB_ID
+//PRIVATE: UPDATE THE EXISTING JOB BY JOB_ID
 export const updateJob = async (req: Request, res: Response) => {
   try {
     const jobId = req.params.id;
@@ -60,7 +61,7 @@ export const updateJob = async (req: Request, res: Response) => {
     if (!job) {
       return res.status(404).json({
         success: false,
-        message: "Job not found"
+        message: "Job not found",
       });
     }
 
@@ -68,7 +69,7 @@ export const updateJob = async (req: Request, res: Response) => {
     if (job.createdBy.toString() !== req.user?.userId) {
       return res.status(403).json({
         success: false,
-        message: "You are not authorized to update this job"
+        message: "You are not authorized to update this job",
       });
     }
 
@@ -83,19 +84,19 @@ export const updateJob = async (req: Request, res: Response) => {
     return res.status(200).json({
       success: true,
       message: "Job updated successfully",
-      job
+      job,
     });
   } catch (error: any) {
     // Handle mongoose validation Error
     if (error.name === "ValidationError") {
       const validationErrors = Object.values(error.errors).map(
-        (err: any) => err.message
+        (err: any) => err.message,
       );
 
       return res.status(400).json({
         success: false,
         message: "Validation failed",
-        errors: validationErrors
+        errors: validationErrors,
       });
     }
 
@@ -103,18 +104,18 @@ export const updateJob = async (req: Request, res: Response) => {
     if (error.name === "CastError" && error.kind === "ObjectId") {
       return res.status(400).json({
         success: false,
-        message: "Invalid Job ID format"
+        message: "Invalid Job ID format",
       });
     }
     // Unexpected server Error
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error"
+      message: "Internal Server Error",
     });
   }
 };
 
-// DELETE THE JOB BY JOB_ID
+//PRIVATE: DELETE THE JOB BY JOB_ID
 export const deleteJob = async (req: Request, res: Response) => {
   try {
     const jobId = req.params.id;
@@ -125,7 +126,7 @@ export const deleteJob = async (req: Request, res: Response) => {
     if (!job) {
       return res.status(404).json({
         success: false,
-        message: "Job not found"
+        message: "Job not found",
       });
     }
 
@@ -133,7 +134,7 @@ export const deleteJob = async (req: Request, res: Response) => {
     if (job.createdBy.toString() !== req.user?.userId) {
       return res.status(403).json({
         success: false,
-        message: "You are not authorized to delete this job"
+        message: "You are not authorized to delete this job",
       });
     }
 
@@ -141,26 +142,26 @@ export const deleteJob = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       success: true,
-      message: "Job deleted successfully"
+      message: "Job deleted successfully",
     });
   } catch (error: any) {
     // Handle invalid MongoDB ID format errors
     if (error.name === "CastError" && error.kind === "ObjectId") {
       return res.status(400).json({
         success: false,
-        message: "Invalid Job ID format"
+        message: "Invalid Job ID format",
       });
     }
 
     // Catch-all for unexpected server errors
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error"
+      message: "Internal Server Error",
     });
   }
 };
 
-// GET ALL THE JOB BASED ON FILTER
+//PRIVATE: GET ALL THE JOB BASED ON FILTER
 export const getJobs = async (req: Request, res: Response) => {
   try {
     // Pagination setup
@@ -212,14 +213,48 @@ export const getJobs = async (req: Request, res: Response) => {
         totalPages: Math.ceil(totalJobs / limit),
         currentPage: page,
         jobsPerPage: limit,
-        jobs
-      }
+        jobs,
+      },
     });
   } catch (error: any) {
     console.error("Error in getJobs controller: ", error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error"
+      message: "Internal Server Error",
     });
+  }
+};
+
+// PUBLIC: GET THE JOB BY ID (FOR THE CANDIDATE APPLICATION PAGE)
+export const getJobById = async (req: Request, res: Response) => {
+  try {
+    const jobId = req.params.id;
+
+    const job = await Job.findById(jobId);
+
+    // Check if the job is exist or it is in active mode
+    if (!job || job.status !== "active") {
+      return res.status(404).json({
+        success: false,
+        message: "Job not found or applications are closed.",
+      });
+    }
+
+    await send_email()
+    // Only send non-sensitive data needed for the form (like Title)
+    return res.status(200).json({
+      success: true,
+      data: {
+        title: job.title,
+        skills: job.skills,
+      },
+    });
+  } catch (error: any) {
+    if (error.name === "CastError" && error.kind === "ObjectId") {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid Job Link" });
+    }
+    return res.status(500).json({ success: false, message: "Server Error" });
   }
 };
