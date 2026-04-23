@@ -1,8 +1,27 @@
 import express from "express";
-import { getJobById } from "../controllers/job/job.controller.js";
-import { send_email } from "../utils/email.js";
+import { getJobById, submitApplication } from "../controllers/job/job.controller.js";
+import { uploadResume } from "../middlewares/upload.middleware.js";
+
 const applyRouter = express.Router();
 
 applyRouter.get("/:id/apply", getJobById);
+
+// Wrapper to catch Multer errors and prevent hanging
+applyRouter.post("/:id/apply", (req, res, next) => {
+  const upload = uploadResume.single("resume");
+  
+  upload(req, res, (err) => {
+    if (err) {
+      console.error(" Multer Error Caught:", err.message);
+      return res.status(400).json({
+        success: false,
+        message: "File upload error: " + err.message
+      });
+    }
+    
+    // If we reach here, Multer succeeded! Move to the controller.
+    next();
+  });
+}, submitApplication);
 
 export default applyRouter;
