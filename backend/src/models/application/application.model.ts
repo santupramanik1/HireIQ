@@ -13,27 +13,21 @@ const applicationSchema = new Schema<IApplication>(
       ref: "Candidate",
       required: true,
     },
-    status: {
-      type: String,
-      enum: [
-        "applied",
-        "reviewing",
-        "shortlisted",
-        "interviewed",
-        "rejected",
-        "hired",
-      ],
-      default: "applied",
-    },
-    finalScore: {
-      type: Number,
-      min: [0, "Score cannot be negative"],
-      max: [100, "Score cannot exceed 100"],
-      default: 0,
-    },
-    appliedAt: {
-      type: Date,
-      default: Date.now(),
+
+    currentTitle: { type: String, default: "" },
+    currentCompany: { type: String, default: "" },
+    tags: [{ type: String }],
+
+    // Stats
+    skills: [{ type: String }],
+    yearsOfExperience: { type: Number, default: 0 },
+
+    //Resume analysis
+    aiAnalysis: {
+      matchScore: { type: Number, default: 0, index: -1 }, // Sort top candidates instantly
+      summary: { type: String, default: "" },
+      strengths: [{ type: String }],
+      areasToImprove: [{ type: String }],
     },
   },
   { timestamps: true },
@@ -48,4 +42,7 @@ applicationSchema.index({ jobID: 1, status: 1 });
 // Index for candidate portal (fetch all applications by candidate)
 applicationSchema.index({ candidateID: 1 });
 
-export const Application=mongoose.model<IApplication>("Application",applicationSchema)
+export const Application = mongoose.model<IApplication>(
+  "Application",
+  applicationSchema,
+);
