@@ -1,8 +1,8 @@
 import type { Document } from "mongoose";
 
 export interface ICandidate extends Document {
-email: string; // The unique identifier across your whole system
   name: string;
+  email: string; // The unique identifier across your whole system
   phone?: string;
   linkedInUrl?: string;
   githubUrl?: string;
