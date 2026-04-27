@@ -34,7 +34,12 @@ async def process_resume_url(url: str, job_id: str, user_id: str = None) -> dict
             [
                 (
                     "system",
-                    "You are an expert technical AI recruiter for HireIQ. Your job is to extract the requested information from the provided resume text accurately. If a field is missing from the resume, leave it blank or 0. DO NOT make up information.",
+                    """You are an expert technical AI recruiter for HireIQ. Your job is to extract the requested information from the provided resume text accurately. If a field is missing from the resume, leave it blank or 0. DO NOT make up information.
+                    
+             CRITICAL INSTRUCTIONS:
+            - DO NOT output any conversational text.
+            - DO NOT use Markdown formatting (like **bold** or bullet points).
+            - Output ONLY a raw, perfectly formatted JSON object.""",
                 ),
                 ("human", "Here is the resume text:\n\n{resume_text}"),
             ]

@@ -1,14 +1,17 @@
-import express from "express"
-import { createJob, deleteJob, getJobs, updateJob } from "../controllers/job/job.controller.js"
-import { isAuthenticated } from "../middlewares/auth.middleware.js"
-const jobRouter=express.Router()
+import express from "express";
+import {
+  createJob,
+  deleteJob,
+  getJobs,
+  updateJob
+} from "../controllers/job/job.controller.js";
+import { isAuthenticated } from "../middlewares/auth.middleware.js";
+const jobRouter = express.Router();
 
 // Protect all job routes with the JWT middleware
-jobRouter.use(isAuthenticated)
+jobRouter.post("/", isAuthenticated, createJob);            // CREATE: POST /api/jobs
+jobRouter.get("/", isAuthenticated, getJobs);               // READ:   GET /api/jobs
+jobRouter.put("/:id", isAuthenticated, updateJob);          // UPDATE: PUT /api/jobs/:id
+jobRouter.delete("/:id", isAuthenticated, deleteJob);       // DELETE: DELETE /api/jobs/:id
 
-jobRouter.post("/create",createJob)
-jobRouter.put("/update/:id",updateJob)
-jobRouter.delete("/delete/:id",deleteJob)
-jobRouter.get("/get",getJobs)
-
-export default jobRouter
+export default jobRouter;

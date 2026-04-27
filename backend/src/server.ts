@@ -1,6 +1,6 @@
 import dotenv from "dotenv/config";
 
-import express, { type Request, type Response } from "express";
+import express, { type NextFunction, type Request, type Response } from "express";
 import { connDB } from "./config/db.js";
 import cookieParser from "cookie-parser";
 import userRouter from "./routes/user.routes.js";
@@ -19,17 +19,27 @@ app.use(cookieParser());
 // Authentication
 app.use("/api/auth", userRouter);
 
-// Job management
+// Candidate apply (Public Candidate Routes)
+app.use("/api/jobs", applyRouter);
+
+// Job management (Protected Recruiter Routes)
 app.use("/api/jobs", jobRouter);
 
-// Candidate apply
-app.use("/api/job", applyRouter);
 
-// Mongodb connection
+
+// Database & Services connection
 await connDB();
-
-// Test Cloudinary Connection
 await testCloudinaryConnection();
+
+// Global Error Handling Middleware
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    console.error("CRITICAL UNHANDLED ERROR:", err.stack);
+    
+    res.status(500).json({
+        success: false,
+        message: "Something went wrong on our end. Our team has been notified."
+    });
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
