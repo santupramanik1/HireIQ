@@ -6,37 +6,25 @@ const applicationSchema = new Schema<IApplication>(
     jobID: {
       type: Schema.Types.ObjectId,
       ref: "Job",
-      required: true,
+      required: true
     },
     candidateID: {
       type: Schema.Types.ObjectId,
       ref: "Candidate",
-      required: true,
+      required: true
     },
 
     status: {
       type: String,
       enum: ["applied", "screening", "interviewing", "offered", "rejected"],
-      default: "applied",
+      default: "applied"
     },
-
-    currentTitle: { type: String, default: "" },
-    currentCompany: { type: String, default: "" },
-    tags: [{ type: String }],
-
-    // Stats
-    skills: [{ type: String }],
-    yearsOfExperience: { type: Number, default: 0 },
-
-    //Resume analysis
-    aiAnalysis: {
-      matchScore: { type: Number, default: 0, index: -1 }, // Sort top candidates instantly
-      summary: { type: String, default: "" },
-      strengths: [{ type: String }],
-      areasToImprove: [{ type: String }],
-    },
+    finalScore: {
+      type: Number,
+      default: 0
+    }
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 // Compound unique index — one candidate cannot apply to same job twice
@@ -50,5 +38,5 @@ applicationSchema.index({ candidateID: 1 });
 
 export const Application = mongoose.model<IApplication>(
   "Application",
-  applicationSchema,
+  applicationSchema
 );
