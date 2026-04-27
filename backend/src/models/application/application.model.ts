@@ -14,6 +14,12 @@ const applicationSchema = new Schema<IApplication>(
       required: true,
     },
 
+    status: {
+      type: String,
+      enum: ["applied", "screening", "interviewing", "offered", "rejected"],
+      default: "applied",
+    },
+
     currentTitle: { type: String, default: "" },
     currentCompany: { type: String, default: "" },
     tags: [{ type: String }],

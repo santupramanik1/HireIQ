@@ -21,7 +21,7 @@ const candidateSchema = new Schema<ICandidate>(
     linkedInUrl: { type: String, default: "" },
     githubUrl: { type: String, default: "" },
     location: { type: String, default: "" },
-    resumeUrl: { type: String, required: true },
+    latestResumeUrl: { type: String, required: true },
   },
   { timestamps: true },
 );
