@@ -1,6 +1,10 @@
 # Ignore the virtual environment folder
 venv/
-.vscode/
+
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
 
 # Ignore compiled Python files
 **/__pycache__/
