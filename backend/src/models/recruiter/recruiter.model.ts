@@ -3,9 +3,13 @@ import { UserRole, type IUser } from "./recruiter.interface.js";
 
 const userSchema = new Schema<IUser>(
   {
-    name: {
+    firstname: {
       type: String,
-      required: [true, "Name is required"],
+      required: [true, "firstame is required"],
+      trim: true,
+    },
+     lastname: {
+      type: String,
       trim: true,
     },
     email: {
@@ -19,18 +23,13 @@ const userSchema = new Schema<IUser>(
       enum: Object.values(UserRole),
       default: UserRole.RECRUITER,
     },
-    provider: {
-      type: String,
-      enum: ["google"],
-      required: true,
-    },
-    providerId: {
-      type: String,
-      unique: true,
-    },
-    avatar: {
+    picture: {
       type: String,
     },
+    isActive:{
+      type:Boolean,
+      default:false
+    }
   },
   { timestamps: true },
 );

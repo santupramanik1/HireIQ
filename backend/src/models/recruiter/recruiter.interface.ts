@@ -6,12 +6,12 @@ export enum UserRole {
 }
 
 export interface IUser extends Document {
-  name: string;
+  firstname: string;
+  lastname?:string|undefined
   email: string;
   role: UserRole;
-  provider: "google";
-  providerId: string;
-  avatar?: string; // Profile picture from Google
+  picture?: string; // Profile picture from Google
+  isActive:boolean
   createdAt: Date;
   updatedAt: Date;
 }
