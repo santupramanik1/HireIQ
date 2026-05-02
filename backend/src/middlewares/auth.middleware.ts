@@ -6,21 +6,26 @@ export const isAuthenticated = async (
   res: Response,
   next: NextFunction
 ) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ success: false, message: "Unauthorized" });
-  }
-
-  const token = authHeader.split(" ")[1];
-  if (!token) {
-    return res.status(401).json({ success: false, message: "Token not found" });
-  }
   try {
-    const decode = verifyAccessToken(token);
-    req.user = decode;
+    // Take the token from the cookie
+    const token = req.cookies.access_token;
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Access denied. No token provided."
+      });
+    }
+
+    // Verify the access token
+    const decoded = verifyAccessToken(token);
+
+    req.user = decoded;
+
     next();
   } catch (error) {
-    res.status(401).json({ success: false, message: "Token expired" });
+    return res.status(401).json({
+      success: false,
+      message: "Session expired or invalid token."
+    });
   }
 };

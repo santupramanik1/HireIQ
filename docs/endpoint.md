@@ -43,4 +43,3 @@ Public endpoints used by candidates to view jobs and submit applications.
 | `POST` | `/api/jobs/:id/applications`                | Accepts the final, verified JSON form data, triggers the AI match engine, and saves the application to the database.     |
 
 ---
-
