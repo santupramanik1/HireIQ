@@ -11,7 +11,7 @@ import jobRouter from "./routes/job.routes.js";
 import applyRouter from "./routes/public.routes.js";
 import { testCloudinaryConnection } from "./config/cloudinary.js";
 import cors from "cors";
-import { connectRedis } from "./config/redis.js";
+// import { connectRedis } from "./config/redis.js";
 
 const app = express();
 
@@ -40,7 +40,7 @@ app.use("/api/jobs", jobRouter);
 // Database & Services connection
 await connDB();
 await testCloudinaryConnection();
-await connectRedis()
+// await connectRedis()
 
 // Global Error Handling Middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {

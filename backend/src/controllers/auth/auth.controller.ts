@@ -38,7 +38,8 @@ export const login = async (req: Request, res: Response) => {
       httpOnly: true,
       secure: isProduction,
       sameSite: "lax",
-      maxAge: 15 * 60 * 1000
+      maxAge: 15 * 60 * 1000,
+      path: "/",
     });
 
     // Set Refresh Token Cookie (30 mins)
@@ -46,7 +47,8 @@ export const login = async (req: Request, res: Response) => {
       httpOnly: true,
       secure: isProduction,
       sameSite: "lax",
-      maxAge: 30 * 60 * 1000
+      maxAge: 30 * 60 * 1000,
+      path: "/",
     });
 
     return res.status(200).json({
@@ -58,5 +60,38 @@ export const login = async (req: Request, res: Response) => {
     if (error.message === "invalid_grant")
       return res.status(400).json({ success: false, message: "Invalid code" });
     res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+// LOGOUT
+export const logout = async (req: Request, res: Response) => {
+  try {
+    const isProduction = process.env.NODE_ENV === "production";
+    // Clear the Access Token cookie
+    res.clearCookie("access_token", {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: "lax",
+      path: "/",
+    });
+
+    // Clear the Refresh Token
+    res.clearCookie("refresh_token", {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: "lax",
+      path: "/"
+    });
+
+    // Send success response
+    return res.status(200).json({
+      success: true,
+      message: "Successfully logged out."
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred during logout."
+    });
   }
 };

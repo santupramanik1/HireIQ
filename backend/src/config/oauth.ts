@@ -1,7 +1,7 @@
 import { OAuth2Client } from "google-auth-library";
 import { User } from "../models/recruiter/recruiter.model.js";
 import { generateAcessToken, generateRefreshToken } from "../utils/jwt.js";
-import { redisClient } from "./redis.js";
+// import { redisClient } from "./redis.js";
 
 const client_id = process.env.GOOGLE_CLIENT_ID;
 const client_secret = process.env.GOOGLE_CLIENT_SECRET;
@@ -33,6 +33,7 @@ export interface GoogleLoginResult {
     role: string;
     user: {
       firstname: string;
+      lastname?:string
       email: string;
       profilePicture: string;
     };
@@ -87,9 +88,9 @@ export async function googleLogin(
     const accessToken = generateAcessToken(tokenPayload);
     const refreshToken = generateRefreshToken(tokenPayload);
 
-    await redisClient.set(`refresh_token${user._id.toString()}`, refreshToken, {
-      EX: 30 * 60
-    });
+    // await redisClient.set(`refresh_token${user._id.toString()}`, refreshToken, {
+    //   EX: 30 * 60
+    // });
     await user.save();
 
     // FIX 2 & 3: Cleaned up the return brackets and mapped user.picture to profilePicture
@@ -100,6 +101,7 @@ export async function googleLogin(
         role: user.role,
         user: {
           firstname: user.firstname,
+          lastname:user.lastname||"",
           email: user.email,
           profilePicture: user.picture || "" // Maps your DB field to the React interface
         }

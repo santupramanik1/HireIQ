@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { JobCard, jobs } from "../components/job/JobCard";
 import CreateJobModal from "../components/job/CreateJobModal";
+import { useAuth } from "../context/AuthContext";
 
 // ==========================================
 // TYPES & INTERFACES
@@ -29,7 +30,7 @@ const navItems: NavItem[] = [
   { icon: "work", label: "Jobs" },
   { icon: "group", label: "Candidates" },
   { icon: "calendar_today", label: "Schedules" },
-  { icon: "settings", label: "Settings" },
+  { icon: "settings", label: "Settings" }
 ];
 
 const metrics: MetricCard[] = [
@@ -38,34 +39,40 @@ const metrics: MetricCard[] = [
     value: 7,
     icon: "assignment",
     colorClass: "text-blue-600",
-    bgClass: "bg-blue-50",
+    bgClass: "bg-blue-50"
   },
   {
     title: "Active",
     value: 5,
     icon: "check_circle",
     colorClass: "text-emerald-600",
-    bgClass: "bg-emerald-50",
+    bgClass: "bg-emerald-50"
   },
   {
     title: "Drafts",
     value: 2,
     icon: "edit_note",
     colorClass: "text-amber-600",
-    bgClass: "bg-amber-50",
+    bgClass: "bg-amber-50"
   },
   {
     title: "Expired",
     value: 0,
     icon: "history",
     colorClass: "text-slate-500",
-    bgClass: "bg-slate-100",
-  },
+    bgClass: "bg-slate-100"
+  }
 ];
 
 export default function DashboardPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  // Get user profile details form the auth context
+  const { user,logout } = useAuth();
+  const firstname = user?.firstname;
+  const lastname = user?.lastname;
+  const profilePicture = user?.profilePicture;
 
   // Prevent to scroll the page if the sidebar is opened
   useEffect(() => {
@@ -79,7 +86,6 @@ export default function DashboardPage() {
     };
   }, [isSidebarOpen]);
 
-  
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 font-class">
       <CreateJobModal
@@ -130,17 +136,44 @@ export default function DashboardPage() {
           ))}
         </nav>
 
+        {/* --- USER PROFILE & LOGOUT --- */}
         <div className="mt-auto space-y-4">
-          <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-2xl border border-slate-200">
-            <div className="w-10 h-10 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center text-blue-700 font-bold">
-              AS
+          <div className="flex items-center justify-between px-4 py-3 bg-slate-50 rounded-2xl border border-slate-200 group">
+            {/* Left Side: Avatar and Info */}
+            <div className="flex items-center gap-3 overflow-hidden">
+              {profilePicture ? (
+                <img
+                  src={profilePicture}
+                  alt={`${firstname} profile`}
+                  referrerPolicy="no-referrer"
+                  className="w-10 h-10 rounded-full object-cover border border-slate-200 shrink-0"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center text-blue-700 font-bold uppercase shrink-0">
+                  {firstname?.charAt(0) || "U"}
+                </div>
+              )}
+
+              <div className="overflow-hidden">
+                <p className="text-sm font-bold truncate text-slate-900">
+                  {firstname || "New"} {lastname || "User"}
+                </p>
+                <p className="text-xs text-slate-500 capitalize">
+                  {user?.role || "Recruiter"}
+                </p>
+              </div>
             </div>
-            <div className="overflow-hidden">
-              <p className="text-sm font-bold truncate text-slate-900">
-                Alex Sterling
-              </p>
-              <p className="text-xs text-slate-500">Lead Recruiter</p>
-            </div>
+
+            {/* Right Side: Logout Button */}
+            <button
+              onClick={() => {
+                 logout();
+              }}
+              title="Logout"
+              className="text-slate-400 hover:text-red-500 p-2 rounded-xl hover:bg-red-50 transition-colors flex items-center justify-center cursor-pointer shrink-0"
+            >
+              <span className="material-symbols-outlined text-xl">logout</span>
+            </button>
           </div>
         </div>
       </aside>
