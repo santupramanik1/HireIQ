@@ -7,7 +7,7 @@ import {
   type ReactNode
 } from "react";
 import toast from "react-hot-toast";
-import {useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export interface User {
   firstname: string;
@@ -42,6 +42,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   }, []);
 
+  // Global Axios Interceptor for Expired Tokens
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status == 401) {
+          if (!error.config.url.includes("/auth/logout")) {
+            toast.error("Session expired. Please log in again.");
+            setUser(null);
+            localStorage.removeItem("user");
+            navigate("/login");
+          }
+        }
+        return Promise.reject(error);
+      }
+    );
+    return () => {
+      axios.interceptors.response.eject(interceptor);
+    };
+  }, [navigate]);
+
   // Login
   const login = (userData: User) => {
     setUser(userData);
@@ -60,8 +81,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const successMessage = data?.message;
       toast.success(successMessage);
     } catch (error: any) {
-      const errorMessage = error?.data?.message || "Logout failed on server";
-      toast.error(errorMessage);
+      if (error.response?.status === 401) {
+        console.log("Session already expired on the server.");
+      } else {
+        const errorMessage =
+          error.response?.data?.message || "Logout failed on server";
+        toast.error(errorMessage);
+      }
     } finally {
       setUser(null);
       localStorage.removeItem("user");

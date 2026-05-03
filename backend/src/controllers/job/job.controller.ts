@@ -28,7 +28,6 @@ export const createJob = async (req: Request, res: Response) => {
     return res.status(201).json({
       success: true,
       message: "Job created successfully",
-      job: newJob
     });
   } catch (error: any) {
     // Check if the error is mongoose validation error

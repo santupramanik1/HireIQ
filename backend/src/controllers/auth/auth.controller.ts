@@ -38,7 +38,7 @@ export const login = async (req: Request, res: Response) => {
       httpOnly: true,
       secure: isProduction,
       sameSite: "lax",
-      maxAge: 15 * 60 * 1000,
+      maxAge: 60 * 60 * 1000,
       path: "/",
     });
 

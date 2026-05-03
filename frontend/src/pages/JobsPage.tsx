@@ -1,4 +1,7 @@
-import { JobCard, jobs } from "../components/job/JobCard";
+import { useEffect, useState } from "react";
+import { JobCard } from "../components/job/JobCard";
+import { useOutletContext } from "react-router-dom";
+import axios from "axios";
 
 // ==========================================
 // TYPES & INTERFACES
@@ -47,7 +50,37 @@ const metrics: MetricCard[] = [
   }
 ];
 
+interface DashboardContext {
+  refreshTrigger: number;
+}
+
 export default function JobsPage() {
+  const [jobList, setJobList] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Grab the trigger from the parent Layout
+  const { refreshTrigger } = useOutletContext<DashboardContext>();
+
+  // Fetch jobs from backend
+  const fetchJobs = async () => {
+    setIsLoading(true);
+    try {
+      const { data } = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/jobs`,
+        { withCredentials: true }
+      );
+      setJobList(data.data.jobs);
+    } catch (error: any) {
+      console.error("Failed to fetch jobs:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchJobs();
+  }, [refreshTrigger]);
+
   return (
     <>
       {/* Header Section */}
@@ -71,9 +104,7 @@ export default function JobsPage() {
             <div
               className={`w-12 h-12 rounded-2xl flex items-center justify-center ${metric.bgClass} ${metric.colorClass}`}
             >
-              <span className="material-symbols-outlined">
-                {metric.icon}
-              </span>
+              <span className="material-symbols-outlined">{metric.icon}</span>
             </div>
             <div>
               <p className="text-slate-500 text-sm font-medium mb-1">
@@ -91,7 +122,7 @@ export default function JobsPage() {
       <div className="flex justify-between items-end mb-6">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
-            Showing {jobs.length} jobs
+            Showing {jobList.length} jobs
           </h2>
           <p className="text-slate-500 text-sm mt-1">
             Sort by:{" "}
@@ -103,19 +134,23 @@ export default function JobsPage() {
       </div>
 
       {/* Job Cards Grid */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {jobs.map((job) => (
-          <JobCard
-            key={job.id}
-            status={job.status}
-            title={job.title}
-            schedule={job.schedule}
-            level={job.level}
-            salary={job.salary}
-            matchCount={job.matchCount}
-          />
-        ))}
-      </section>
+      {isLoading ? (
+        <p className="text-slate-500">Loading jobs...</p>
+      ) : (
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {jobList.map((job) => (
+            <JobCard
+              key={job._id} 
+              status={job.status}
+              title={job.title}
+              type={job.type} 
+              department={job.department}
+              salary={job.salary}
+              matchCount={0}
+            />
+          ))}
+        </section>
+      )}
     </>
   );
 }

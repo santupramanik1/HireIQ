@@ -29,6 +29,10 @@ export default function DashboardLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
+  // Trigger state to tell child pages to refresh their data
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+
   const location = useLocation();
 
   // Get user profile details form the auth context
@@ -59,6 +63,7 @@ export default function DashboardLayout() {
       <CreateJobModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={()=>setRefreshTrigger((prev)=>prev+1)}
       />
 
       {/* Mobile Sidebar Overlay */}
@@ -190,7 +195,7 @@ export default function DashboardLayout() {
       {/* Main Content Area - Outlet renders the child pages here */}
       <main className="lg:pl-64 pb-12 pt-8 font-class">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
-          <Outlet />
+          <Outlet  context={{refreshTrigger}} />
         </div>
       </main>
     </div>

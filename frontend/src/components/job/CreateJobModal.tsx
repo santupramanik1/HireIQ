@@ -1,15 +1,35 @@
-import{ useEffect, useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 interface CreateJobModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess: () => void;
 }
 
 export default function CreateJobModal({
   isOpen,
   onClose,
+  onSuccess
 }: CreateJobModalProps) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [formData, setFormData] = useState({
+    title: "",
+    department: "",
+    type: "full-time",
+    location: "",
+    status: "draft",
+    minSalary: "",
+    maxSalary: "",
+    currency: "USD",
+    description: "",
+    skills: "",
+    requirements: "",
+    responsibilities: ""
+  });
 
   useEffect(() => {
     if (isOpen) {
@@ -30,6 +50,70 @@ export default function CreateJobModal({
     setIsGenerating(true);
     // Simulate API call
     setTimeout(() => setIsGenerating(false), 1500);
+  };
+
+  // Trigger on Input change
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Trigger on form submit
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const { minSalary, maxSalary, currency, ...restData } = formData;
+
+      const payload = {
+        ...restData,
+        salary: {
+          min: minSalary ? Number(minSalary) : 0,
+          max: maxSalary ? Number(maxSalary) : 0,
+          currency: currency
+        }
+      };
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/jobs`,
+        payload,
+        { withCredentials: true }
+      );
+
+      toast.success(data.message);
+
+      // On success, tell the dashboard to fetch the new list and close the modal
+      onSuccess();
+      onClose();
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to create job";
+      toast.error(errorMessage);
+    } finally {
+      // Always turn off the loading spinner, whether it succeeded or failed
+      setIsSubmitting(false);
+    }
+    // Reset form
+    setFormData({
+      title: "",
+      department: "",
+      type: "full-time",
+      location: "",
+      status: "draft",
+      minSalary: "",
+      maxSalary: "",
+      currency: "USD",
+      description: "",
+      skills: "",
+      requirements: "",
+      responsibilities: ""
+    });
   };
 
   return (
@@ -114,7 +198,11 @@ export default function CreateJobModal({
           </div>
 
           {/* Form Grid */}
-          <form className="grid grid-cols-6 gap-x-5 gap-y-6">
+          <form
+            onSubmit={handleFormSubmit}
+            id="create-job-form"
+            className="grid grid-cols-6 gap-x-5 gap-y-6"
+          >
             {/* Row 1: Halves */}
             <div className="col-span-6 sm:col-span-3">
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">
@@ -122,6 +210,9 @@ export default function CreateJobModal({
               </label>
               <input
                 type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
                 placeholder="e.g. Senior React Developer"
                 className="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 block p-3 outline-none transition-all shadow-sm"
               />
@@ -132,6 +223,9 @@ export default function CreateJobModal({
               </label>
               <input
                 type="text"
+                name="department"
+                value={formData.department}
+                onChange={handleInputChange}
                 placeholder="e.g. Engineering"
                 className="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 block p-3 outline-none transition-all shadow-sm"
               />
@@ -142,10 +236,15 @@ export default function CreateJobModal({
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">
                 Type
               </label>
-              <select className="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 block p-3 outline-none transition-all shadow-sm appearance-none">
-                <option>Full-time</option>
-                <option>Part-time</option>
-                <option>Internship</option>
+              <select
+                name="type"
+                value={formData.type}
+                onChange={handleInputChange}
+                className="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 block p-3 outline-none transition-all shadow-sm appearance-none"
+              >
+                <option value="full-time">Full-time</option>
+                <option value="part-time">Part-time</option>
+                <option value="internship">Internship</option>
               </select>
             </div>
 
@@ -155,6 +254,9 @@ export default function CreateJobModal({
               </label>
               <input
                 type="text"
+                name="location"
+                value={formData.location}
+                onChange={handleInputChange}
                 placeholder="e.g. Remote"
                 className="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 block p-3 outline-none transition-all shadow-sm"
               />
@@ -164,11 +266,15 @@ export default function CreateJobModal({
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">
                 Status
               </label>
-              <select className="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 block p-3 outline-none transition-all shadow-sm appearance-none">
-                <option>Draft</option>
-                <option>Active</option>
-                <option>Expired</option>
-                
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleInputChange}
+                className="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 block p-3 outline-none transition-all shadow-sm appearance-none"
+              >
+                <option value="draft">Draft</option>
+                <option value="active">Active</option>
+                <option value="expired">Expired</option>
               </select>
             </div>
 
@@ -179,6 +285,9 @@ export default function CreateJobModal({
               </label>
               <input
                 type="number"
+                name="minSalary"
+                value={formData.minSalary}
+                onChange={handleInputChange}
                 placeholder="80000"
                 className="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 block p-3 outline-none transition-all shadow-sm"
               />
@@ -189,6 +298,9 @@ export default function CreateJobModal({
               </label>
               <input
                 type="number"
+                name="maxSalary"
+                value={formData.maxSalary}
+                onChange={handleInputChange}
                 placeholder="120000"
                 className="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 block p-3 outline-none transition-all shadow-sm"
               />
@@ -197,11 +309,16 @@ export default function CreateJobModal({
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">
                 Currency
               </label>
-              <select className="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 block p-3 outline-none transition-all shadow-sm appearance-none">
-                <option>USD</option>
-                <option>EUR</option>
-                <option>GBP</option>
-                <option>INR</option>
+              <select
+                name="currency"
+                value={formData.currency}
+                onChange={handleInputChange}
+                className="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 block p-3 outline-none transition-all shadow-sm appearance-none"
+              >
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+                <option value="INR">INR</option>
               </select>
             </div>
 
@@ -212,6 +329,9 @@ export default function CreateJobModal({
               </label>
               <textarea
                 rows={4}
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
                 placeholder="Job overview..."
                 className="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 block p-3 outline-none transition-all shadow-sm resize-none"
               ></textarea>
@@ -224,6 +344,9 @@ export default function CreateJobModal({
               </label>
               <textarea
                 rows={3}
+                name="skills"
+                value={formData.skills}
+                onChange={handleInputChange}
                 placeholder="Key skills..."
                 className="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 block p-3 outline-none transition-all shadow-sm resize-none"
               ></textarea>
@@ -234,6 +357,9 @@ export default function CreateJobModal({
               </label>
               <textarea
                 rows={3}
+                name="requirements"
+                value={formData.requirements}
+                onChange={handleInputChange}
                 placeholder="Required skills..."
                 className="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 block p-3 outline-none transition-all shadow-sm resize-none"
               ></textarea>
@@ -246,6 +372,9 @@ export default function CreateJobModal({
               </label>
               <textarea
                 rows={3}
+                name="responsibilities"
+                value={formData.responsibilities}
+                onChange={handleInputChange}
                 placeholder="Required Responsibilities..."
                 className="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 block p-3 outline-none transition-all shadow-sm resize-none"
               ></textarea>
@@ -257,12 +386,27 @@ export default function CreateJobModal({
         <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3 rounded-b-2xl shrink-0">
           <button
             onClick={onClose}
+            disabled={isSubmitting}
             className="px-6 py-2.5 text-sm font-bold cursor-pointer text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm"
           >
             Cancel
           </button>
-          <button className="px-6 py-2.5 text-sm font-bold text-white button-bg-color cursor-pointer rounded-xl hover:bg-blue-700 shadow-sm transition-colors">
-            Create Job
+          <button
+            type="submit"
+            form="create-job-form"
+            disabled={isSubmitting}
+            className="px-6 py-2.5 text-sm font-bold text-white button-bg-color cursor-pointer rounded-xl hover:bg-blue-700 shadow-sm transition-colors flex items-center justify-center gap-2"
+          >
+            {isSubmitting ? (
+              <>
+                <span className="material-symbols-outlined text-base animate-spin">
+                  progress_activity
+                </span>
+                Creating...
+              </>
+            ) : (
+              "Create Job"
+            )}
           </button>
         </div>
       </div>
