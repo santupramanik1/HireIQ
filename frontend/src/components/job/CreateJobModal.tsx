@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import{ useEffect, useState } from "react";
 
 interface CreateJobModalProps {
   isOpen: boolean;
@@ -42,8 +42,7 @@ export default function CreateJobModal({
 
       {/* Modal Container */}
       <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-xl flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        {/* SCROLLABLE BODY WITH HIDDEN SCROLLBAR
-         */}
+        {/* SCROLLABLE BODY WITH HIDDEN SCROLLBAR */}
         <div className="px-6 py-8 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {/* Header */}
           <div className="flex justify-between items-start mb-6">
@@ -94,7 +93,9 @@ export default function CreateJobModal({
                 className="button-bg-color cursor-pointer text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-70"
               >
                 <span
-                  className={`material-symbols-outlined text-[18px] ${isGenerating ? "animate-spin" : ""}`}
+                  className={`material-symbols-outlined text-[18px] ${
+                    isGenerating ? "animate-spin" : ""
+                  }`}
                 >
                   {isGenerating ? "progress_activity" : "auto_awesome"}
                 </span>
@@ -136,8 +137,8 @@ export default function CreateJobModal({
               />
             </div>
 
-            {/* Row 2: Thirds */}
-            <div className="col-span-6 sm:col-span-3">
+            {/* Row 2: Thirds (Updated to include Status) */}
+            <div className="col-span-6 sm:col-span-2">
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">
                 Type
               </label>
@@ -148,15 +149,27 @@ export default function CreateJobModal({
               </select>
             </div>
 
-            <div className="col-span-6 sm:col-span-3">
+            <div className="col-span-6 sm:col-span-2">
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">
                 Location
               </label>
               <input
                 type="text"
-                placeholder="e.g. New York / Remote"
+                placeholder="e.g. Remote"
                 className="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 block p-3 outline-none transition-all shadow-sm"
               />
+            </div>
+
+            <div className="col-span-6 sm:col-span-2">
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                Status
+              </label>
+              <select className="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 block p-3 outline-none transition-all shadow-sm appearance-none">
+                <option>Draft</option>
+                <option>Active</option>
+                <option>Expired</option>
+                
+              </select>
             </div>
 
             {/* Row 3: Thirds */}
@@ -226,6 +239,7 @@ export default function CreateJobModal({
               ></textarea>
             </div>
 
+            {/* Row 6: Full Width */}
             <div className="col-span-6 sm:col-span-6">
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">
                 Responsibilities
