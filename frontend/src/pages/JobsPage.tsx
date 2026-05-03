@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { JobCard } from "../components/job/JobCard";
 import { useOutletContext } from "react-router-dom";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 // ==========================================
 // TYPES & INTERFACES
@@ -15,41 +16,6 @@ interface MetricCard {
   bgClass: string;
 }
 
-// ==========================================
-// MOCK DATA
-// ==========================================
-
-const metrics: MetricCard[] = [
-  {
-    title: "Total Jobs",
-    value: 7,
-    icon: "assignment",
-    colorClass: "text-blue-600",
-    bgClass: "bg-blue-50"
-  },
-  {
-    title: "Active",
-    value: 5,
-    icon: "check_circle",
-    colorClass: "text-emerald-600",
-    bgClass: "bg-emerald-50"
-  },
-  {
-    title: "Drafts",
-    value: 2,
-    icon: "edit_note",
-    colorClass: "text-amber-600",
-    bgClass: "bg-amber-50"
-  },
-  {
-    title: "Expired",
-    value: 0,
-    icon: "history",
-    colorClass: "text-slate-500",
-    bgClass: "bg-slate-100"
-  }
-];
-
 interface DashboardContext {
   refreshTrigger: number;
 }
@@ -57,6 +23,7 @@ interface DashboardContext {
 export default function JobsPage() {
   const [jobList, setJobList] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [totalJobs, setTotalJobs] = useState<number>(0);
 
   // Grab the trigger from the parent Layout
   const { refreshTrigger } = useOutletContext<DashboardContext>();
@@ -66,10 +33,11 @@ export default function JobsPage() {
     setIsLoading(true);
     try {
       const { data } = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/jobs`,
+        `${import.meta.env.VITE_API_BASE_URL}/jobs?limit=50`,
         { withCredentials: true }
       );
       setJobList(data.data.jobs);
+      setTotalJobs(data.data.totalJobs);
     } catch (error: any) {
       console.error("Failed to fetch jobs:", error);
     } finally {
@@ -80,6 +48,68 @@ export default function JobsPage() {
   useEffect(() => {
     fetchJobs();
   }, [refreshTrigger]);
+
+  const handleStatusChange = async (jobId: string, newStatus: string) => {
+    console.log("Handle status");
+    setJobList((prevJobs) =>
+      prevJobs.map((job) =>
+        job._id === jobId ? { ...job, status: newStatus } : job
+      )
+    );
+    try {
+      await axios.put(
+        `${import.meta.env.VITE_API_BASE_URL}/jobs/${jobId}`,
+        { status: newStatus },
+        { withCredentials: true }
+      );
+
+      toast.success(`Job marked as ${newStatus}`);
+    } catch (error: any) {
+      toast.error("Failed to update job status.");
+      fetchJobs();
+    }
+  };
+
+  const activeCount = jobList.filter(
+    (job) => job.status.toLowerCase() === "active"
+  ).length;
+  const draftCount = jobList.filter(
+    (job) => job.status.toLowerCase() === "draft"
+  ).length;
+  const expiredCount = jobList.filter(
+    (job) => job.status.toLowerCase() === "expired"
+  ).length;
+
+  const metrics: MetricCard[] = [
+    {
+      title: "Total Jobs",
+      value: totalJobs,
+      icon: "assignment",
+      colorClass: "text-blue-600",
+      bgClass: "bg-blue-50"
+    },
+    {
+      title: "Active",
+      value: activeCount,
+      icon: "check_circle",
+      colorClass: "text-emerald-600",
+      bgClass: "bg-emerald-50"
+    },
+    {
+      title: "Drafts",
+      value: draftCount,
+      icon: "edit_note",
+      colorClass: "text-amber-600",
+      bgClass: "bg-amber-50"
+    },
+    {
+      title: "Expired",
+      value: expiredCount,
+      icon: "history",
+      colorClass: "text-slate-500",
+      bgClass: "bg-slate-100"
+    }
+  ];
 
   return (
     <>
@@ -140,13 +170,15 @@ export default function JobsPage() {
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {jobList.map((job) => (
             <JobCard
-              key={job._id} 
+              key={job._id}
+              _id={job._id}
               status={job.status}
               title={job.title}
-              type={job.type} 
+              type={job.type}
               department={job.department}
               salary={job.salary}
               matchCount={0}
+              onStatusChange={handleStatusChange}
             />
           ))}
         </section>
