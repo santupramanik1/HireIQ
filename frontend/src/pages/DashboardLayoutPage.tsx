@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
-import CreateJobModal from "../components/job/CreateJobModal";
-import { useAuth } from "../context/AuthContext";
+import { useEffect, useState } from 'react';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import CreateJobModal from '../components/job/CreateJobModal';
+import { useAuth } from '../context/AuthContext';
 
 // ==========================================
 // TYPES & INTERFACES
@@ -18,11 +18,11 @@ interface NavItem {
 // ==========================================
 
 const navItems: NavItem[] = [
-  { icon: "home", label: "Home", path: "/dashboard" },
-  { icon: "work", label: "Jobs", path: "/dashboard/jobs" },
-  { icon: "group", label: "Candidates", path: "/dashboard/candidates" },
-  { icon: "calendar_today", label: "Schedules", path: "/dashboard/schedules" },
-  { icon: "settings", label: "Settings", path: "/dashboard/settings" }
+  { icon: 'home', label: 'Home', path: '/dashboard' },
+  { icon: 'work', label: 'Jobs', path: '/dashboard/jobs' },
+  { icon: 'group', label: 'Candidates', path: '/dashboard/candidates' },
+  { icon: 'calendar_today', label: 'Schedules', path: '/dashboard/schedules' },
+  { icon: 'settings', label: 'Settings', path: '/dashboard/settings' },
 ];
 
 export default function DashboardLayout() {
@@ -31,7 +31,6 @@ export default function DashboardLayout() {
 
   // Trigger state to tell child pages to refresh their data
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-
 
   const location = useLocation();
 
@@ -49,12 +48,12 @@ export default function DashboardLayout() {
   // Prevent to scroll the page if the sidebar is opened
   useEffect(() => {
     if (isSidebarOpen) {
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = 'unset';
     }
     return () => {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = 'unset';
     };
   }, [isSidebarOpen]);
 
@@ -63,7 +62,7 @@ export default function DashboardLayout() {
       <CreateJobModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        onSuccess={()=>setRefreshTrigger((prev)=>prev+1)}
+        onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
       />
 
       {/* Mobile Sidebar Overlay */}
@@ -76,7 +75,7 @@ export default function DashboardLayout() {
 
       {/* Responsive Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-screen w-64 bg-white border-r border-slate-200 shadow-sm py-8 px-4 z-50 transform transition-transform duration-300 ease-in-out lg:translate-x-0 flex flex-col ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed left-0 top-0 h-screen w-64 bg-white border-r border-slate-200 shadow-sm py-8 px-4 z-50 transform transition-transform duration-300 ease-in-out lg:translate-x-0 flex flex-col ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         <div className="mb-10 px-4 flex justify-between items-center">
           <div className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
@@ -98,12 +97,12 @@ export default function DashboardLayout() {
             <NavLink
               key={item.label}
               to={item.path}
-              end={item.path === "/dashboard"} // Ensures 'Home' only highlights on exact match
+              end={item.path === '/dashboard'} // Ensures 'Home' only highlights on exact match
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                   isActive
-                    ? "bg-blue-50 text-blue-700 font-semibold"
-                    : "text-slate-600 hover:text-blue-600 hover:bg-slate-50 font-medium"
+                    ? 'bg-blue-50 text-blue-700 font-semibold'
+                    : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50 font-medium'
                 }`
               }
             >
@@ -127,16 +126,16 @@ export default function DashboardLayout() {
                 />
               ) : (
                 <div className="w-10 h-10 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center text-blue-700 font-bold uppercase shrink-0">
-                  {firstname?.charAt(0) || "U"}
+                  {firstname?.charAt(0) || 'U'}
                 </div>
               )}
 
               <div className="overflow-hidden">
                 <p className="text-sm font-bold truncate text-slate-900">
-                  {firstname || "New"} {lastname || "User"}
+                  {firstname || 'New'} {lastname || 'User'}
                 </p>
                 <p className="text-xs text-slate-500 capitalize">
-                  {user?.role || "Recruiter"}
+                  {user?.role || 'Recruiter'}
                 </p>
               </div>
             </div>
@@ -195,7 +194,7 @@ export default function DashboardLayout() {
       {/* Main Content Area - Outlet renders the child pages here */}
       <main className="lg:pl-64 pb-12 pt-8 font-class">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
-          <Outlet  context={{refreshTrigger}} />
+          <Outlet context={{ refreshTrigger }} />
         </div>
       </main>
     </div>

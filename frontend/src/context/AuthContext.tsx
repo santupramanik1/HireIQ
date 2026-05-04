@@ -1,13 +1,13 @@
-import axios from "axios";
+import axios from 'axios';
 import {
   createContext,
   useContext,
   useEffect,
   useState,
-  type ReactNode
-} from "react";
-import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+  type ReactNode,
+} from 'react';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 export interface User {
   firstname: string;
@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Initialize state from localStorage on first load
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
+    const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
@@ -48,11 +48,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       (response) => response,
       (error) => {
         if (error.response?.status == 401) {
-          if (!error.config.url.includes("/auth/logout")) {
-            toast.error("Session expired. Please log in again.");
+          if (!error.config.url.includes('/auth/logout')) {
+            toast.error('Session expired. Please log in again.');
             setUser(null);
-            localStorage.removeItem("user");
-            navigate("/login");
+            localStorage.removeItem('user');
+            navigate('/login');
           }
         }
         return Promise.reject(error);
@@ -66,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Login
   const login = (userData: User) => {
     setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem('user', JSON.stringify(userData));
   };
 
   //   Logout
@@ -82,16 +82,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       toast.success(successMessage);
     } catch (error: any) {
       if (error.response?.status === 401) {
-        console.log("Session already expired on the server.");
+        console.log('Session already expired on the server.');
       } else {
         const errorMessage =
-          error.response?.data?.message || "Logout failed on server";
+          error.response?.data?.message || 'Logout failed on server';
         toast.error(errorMessage);
       }
     } finally {
       setUser(null);
-      localStorage.removeItem("user");
-      navigate("/login");
+      localStorage.removeItem('user');
+      navigate('/login');
     }
   };
 
@@ -105,7 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };

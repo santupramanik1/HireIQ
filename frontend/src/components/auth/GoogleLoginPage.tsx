@@ -1,12 +1,12 @@
-import { useEffect, useState, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import axios from "axios";
-import { useAuth } from "../../context/AuthContext";
-import toast from "react-hot-toast";
+import { useEffect, useState, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
+import toast from 'react-hot-toast';
 
 export default function GoogleLogin() {
   const [searchParams] = useSearchParams();
-  const code = searchParams.get("code");
+  const code = searchParams.get('code');
   const navigate = useNavigate();
 
   // 1. Manually manage loading and error states (replacing Apollo)
@@ -39,7 +39,7 @@ export default function GoogleLogin() {
 
         if (result.success) {
           const userData = result.data;
-          toast.success(result.data.message || "Login is Successfull");
+          toast.success(result.data.message || 'Login is Successfull');
 
           //  Save to localStorage before navigating
           if (userData) {
@@ -48,25 +48,25 @@ export default function GoogleLogin() {
               lastname: userData.user.lastname,
               email: userData.user.email,
               role: userData.role,
-              profilePicture: userData.user.profilePicture
+              profilePicture: userData.user.profilePicture,
             });
           }
 
           // Route based on role
-          if (userData?.role === "admin") {
-            navigate("/dashboard");
+          if (userData?.role === 'admin') {
+            navigate('/dashboard');
           } else {
-            navigate("/dashboard");
+            navigate('/dashboard');
           }
         } else {
-          setErrorMessage(result.message || "Authentication failed.");
+          setErrorMessage(result.message || 'Authentication failed.');
         }
       } catch (err: any) {
         // Handle network errors or HTTP 4xx/5xx responses from the backend
         const serverError =
           err.response?.data?.message ||
           err.message ||
-          "Network error occurred";
+          'Network error occurred';
         setErrorMessage(serverError);
         toast.error(serverError);
       } finally {
@@ -121,7 +121,7 @@ export default function GoogleLogin() {
           Authentication Error
         </h1>
         <p className="mt-2 text-gray-600">
-          Something went wrong. Please try logging in again:{" "}
+          Something went wrong. Please try logging in again:{' '}
           <span className="font-semibold">{errorMessage}</span>
         </p>
       </div>

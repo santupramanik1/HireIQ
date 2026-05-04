@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { JobCard } from "../components/job/JobCard";
-import { useOutletContext } from "react-router-dom";
-import axios from "axios";
-import toast from "react-hot-toast";
+import { useEffect, useState } from 'react';
+import { JobCard } from '../components/job/JobCard';
+import { useOutletContext } from 'react-router-dom';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
 // ==========================================
 // TYPES & INTERFACES
@@ -39,7 +39,7 @@ export default function JobsPage() {
       setJobList(data.data.jobs);
       setTotalJobs(data.data.totalJobs);
     } catch (error: any) {
-      console.error("Failed to fetch jobs:", error);
+      console.error('Failed to fetch jobs:', error);
     } finally {
       setIsLoading(false);
     }
@@ -50,7 +50,7 @@ export default function JobsPage() {
   }, [refreshTrigger]);
 
   const handleStatusChange = async (jobId: string, newStatus: string) => {
-    console.log("Handle status");
+    console.log('Handle status');
     setJobList((prevJobs) =>
       prevJobs.map((job) =>
         job._id === jobId ? { ...job, status: newStatus } : job
@@ -65,50 +65,50 @@ export default function JobsPage() {
 
       toast.success(`Job marked as ${newStatus}`);
     } catch (error: any) {
-      toast.error("Failed to update job status.");
+      toast.error('Failed to update job status.');
       fetchJobs();
     }
   };
 
   const activeCount = jobList.filter(
-    (job) => job.status.toLowerCase() === "active"
+    (job) => job.status.toLowerCase() === 'active'
   ).length;
   const draftCount = jobList.filter(
-    (job) => job.status.toLowerCase() === "draft"
+    (job) => job.status.toLowerCase() === 'draft'
   ).length;
   const expiredCount = jobList.filter(
-    (job) => job.status.toLowerCase() === "expired"
+    (job) => job.status.toLowerCase() === 'expired'
   ).length;
 
   const metrics: MetricCard[] = [
     {
-      title: "Total Jobs",
+      title: 'Total Jobs',
       value: totalJobs,
-      icon: "assignment",
-      colorClass: "text-blue-600",
-      bgClass: "bg-blue-50"
+      icon: 'assignment',
+      colorClass: 'text-blue-600',
+      bgClass: 'bg-blue-50',
     },
     {
-      title: "Active",
+      title: 'Active',
       value: activeCount,
-      icon: "check_circle",
-      colorClass: "text-emerald-600",
-      bgClass: "bg-emerald-50"
+      icon: 'check_circle',
+      colorClass: 'text-emerald-600',
+      bgClass: 'bg-emerald-50',
     },
     {
-      title: "Drafts",
+      title: 'Drafts',
       value: draftCount,
-      icon: "edit_note",
-      colorClass: "text-amber-600",
-      bgClass: "bg-amber-50"
+      icon: 'edit_note',
+      colorClass: 'text-amber-600',
+      bgClass: 'bg-amber-50',
     },
     {
-      title: "Expired",
+      title: 'Expired',
       value: expiredCount,
-      icon: "history",
-      colorClass: "text-slate-500",
-      bgClass: "bg-slate-100"
-    }
+      icon: 'history',
+      colorClass: 'text-slate-500',
+      bgClass: 'bg-slate-100',
+    },
   ];
 
   return (
@@ -155,7 +155,7 @@ export default function JobsPage() {
             Showing {jobList.length} jobs
           </h2>
           <p className="text-slate-500 text-sm mt-1">
-            Sort by:{" "}
+            Sort by:{' '}
             <span className="text-blue-600 font-semibold cursor-pointer hover:underline">
               Recently Created
             </span>

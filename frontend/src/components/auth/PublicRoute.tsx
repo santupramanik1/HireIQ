@@ -1,5 +1,5 @@
-import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext"; // Adjust your import path
+import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext'; // Adjust your import path
 
 export default function PublicRoute() {
   const { user, isLoading } = useAuth();

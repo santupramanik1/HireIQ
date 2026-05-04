@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Sparkles, ArrowRight } from "lucide-react";
+import { Sparkles, ArrowRight } from 'lucide-react';
 
 export default function CTASection() {
   return (
@@ -13,10 +13,13 @@ export default function CTASection() {
             <Sparkles size={24} className="text-white" />
           </div>
           <h2 className="font-['Syne',sans-serif] text-[clamp(2rem,5vw,3.2rem)] font-extrabold tracking-tight text-white leading-[1.15] mb-5 relative z-10">
-            Ready to transform <br className="hidden sm:block" /><span className="shimmer-text">your hiring?</span>
+            Ready to transform <br className="hidden sm:block" />
+            <span className="shimmer-text">your hiring?</span>
           </h2>
           <p className="text-white/50 text-base md:text-lg leading-relaxed max-w-md mx-auto mb-10 relative z-10">
-            Join 500+ recruiting teams using VoiceRecruit AI to screen candidates faster, reduce bias, and hire the best talent — all on autopilot.
+            Join 500+ recruiting teams using VoiceRecruit AI to screen
+            candidates faster, reduce bias, and hire the best talent — all on
+            autopilot.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-7 relative z-10">
             <button className="w-full sm:w-auto px-8 py-4 bg-[#6c63ff] hover:bg-[#5b54e6] text-white rounded-full font-semibold transition-all flex items-center justify-center gap-2">

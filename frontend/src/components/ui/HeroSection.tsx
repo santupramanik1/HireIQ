@@ -1,9 +1,12 @@
-"use client";
+'use client';
 
-import { Play, ArrowRight, PhoneCall, CheckCircle2 } from "lucide-react";
+import { Play, ArrowRight, PhoneCall, CheckCircle2 } from 'lucide-react';
 
 function VoiceWaveVisual() {
-  const bars = [0.3, 0.6, 0.9, 0.5, 1, 0.7, 0.4, 0.85, 0.6, 0.3, 0.75, 0.95, 0.5, 0.65, 0.4, 0.8, 0.55, 0.35, 0.9, 0.7];
+  const bars = [
+    0.3, 0.6, 0.9, 0.5, 1, 0.7, 0.4, 0.85, 0.6, 0.3, 0.75, 0.95, 0.5, 0.65, 0.4,
+    0.8, 0.55, 0.35, 0.9, 0.7,
+  ];
 
   return (
     <div className="relative w-full max-w-lg mx-auto animate-float">
@@ -12,13 +15,21 @@ function VoiceWaveVisual() {
         <div className="absolute -top-16 -right-16 w-52 h-52 rounded-full bg-[#6c63ff]/10 blur-[40px] pointer-events-none" />
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-green-500/10 border border-green-500/20 mb-6">
           <span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e] animate-pulse" />
-          <span className="text-green-400 text-xs font-semibold uppercase tracking-wider">Live Screening</span>
+          <span className="text-green-400 text-xs font-semibold uppercase tracking-wider">
+            Live Screening
+          </span>
         </div>
         <div className="flex items-center gap-4 mb-7">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#6c63ff] to-[#a78bfa] flex items-center justify-center text-xl shrink-0">👩‍💼</div>
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#6c63ff] to-[#a78bfa] flex items-center justify-center text-xl shrink-0">
+            👩‍💼
+          </div>
           <div className="flex-1">
-            <div className="font-bold text-base text-white mb-0.5">Sarah Chen</div>
-            <div className="text-white/50 text-xs">Senior Product Manager · Applied 2h ago</div>
+            <div className="font-bold text-base text-white mb-0.5">
+              Sarah Chen
+            </div>
+            <div className="text-white/50 text-xs">
+              Senior Product Manager · Applied 2h ago
+            </div>
           </div>
           <div className="w-10 h-10 rounded-xl bg-[#6c63ff]/20 border border-[#6c63ff]/30 flex items-center justify-center">
             <PhoneCall size={16} className="text-[#a78bfa]" />
@@ -26,19 +37,34 @@ function VoiceWaveVisual() {
         </div>
         <div className="flex items-center justify-center gap-1.5 h-16 mb-6">
           {bars.map((h, i) => (
-            <div key={i} className="w-1.5 rounded-full bg-white/80 animate-wave origin-bottom" style={{ height: `${h * 100}%`, animationDelay: `${i * 0.06}s`, opacity: 0.6 + h * 0.4 }} />
+            <div
+              key={i}
+              className="w-1.5 rounded-full bg-white/80 animate-wave origin-bottom"
+              style={{
+                height: `${h * 100}%`,
+                animationDelay: `${i * 0.06}s`,
+                opacity: 0.6 + h * 0.4,
+              }}
+            />
           ))}
         </div>
         <div className="bg-white/5 rounded-xl p-4 mb-5 border border-white/5">
-          <div className="text-white/40 text-[0.7rem] font-bold uppercase tracking-wider mb-2">AI Agent</div>
-          <div className="text-white/80 text-sm leading-relaxed">"Tell me about your experience leading cross-functional product teams..."</div>
+          <div className="text-white/40 text-[0.7rem] font-bold uppercase tracking-wider mb-2">
+            AI Agent
+          </div>
+          <div className="text-white/80 text-sm leading-relaxed">
+            "Tell me about your experience leading cross-functional product
+            teams..."
+          </div>
         </div>
         <div className="flex items-center justify-between p-3.5 bg-[#6c63ff]/10 rounded-xl border border-[#6c63ff]/20">
           <div className="flex items-center gap-2">
             <CheckCircle2 size={16} className="text-[#a78bfa]" />
             <span className="text-white/70 text-sm">Screening Score</span>
           </div>
-          <div className="font-['Syne',sans-serif] font-extrabold text-lg text-[#a78bfa]">87 / 100</div>
+          <div className="font-['Syne',sans-serif] font-extrabold text-lg text-[#a78bfa]">
+            87 / 100
+          </div>
         </div>
       </div>
     </div>
@@ -56,13 +82,21 @@ export default function HeroSection() {
         <div className="text-center lg:text-left flex flex-col items-center lg:items-start">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 mb-6">
             <span className="text-sm">🎙</span>
-            <span className="text-sm text-white/80 font-medium">AI-Powered Recruiting</span>
+            <span className="text-sm text-white/80 font-medium">
+              AI-Powered Recruiting
+            </span>
           </div>
           <h1 className="font-['Syne',sans-serif] text-[clamp(2.4rem,5vw,4rem)] font-extrabold leading-[1.1] tracking-tight text-white mb-6">
-            Automate Candidate <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#6c63ff] to-[#a78bfa]">Screening</span> with AI Voice Agents
+            Automate Candidate{' '}
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#6c63ff] to-[#a78bfa]">
+              Screening
+            </span>{' '}
+            with AI Voice Agents
           </h1>
           <p className="text-lg leading-relaxed text-white/55 mb-10 max-w-lg">
-            Import candidates, let your AI voice agent conduct screening calls 24/7, then review ranked transcripts and auto-schedule top performers.
+            Import candidates, let your AI voice agent conduct screening calls
+            24/7, then review ranked transcripts and auto-schedule top
+            performers.
           </p>
           <div className="flex flex-col sm:flex-row items-center gap-4 mb-12">
             <button className="w-full sm:w-auto px-8 py-4 bg-[#6c63ff] hover:bg-[#5b54e6] text-white rounded-full font-semibold transition-all flex items-center justify-center gap-2">

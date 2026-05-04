@@ -1,13 +1,13 @@
-import { Route, Routes } from "react-router-dom";
-import LayoutPage from "./app/LayoutPage";
+import { Route, Routes } from 'react-router-dom';
+import LayoutPage from './app/LayoutPage';
 
-import GoogleLoginPage from "./components/auth/GoogleLoginPage";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
-import PublicRoute from "./components/auth/PublicRoute";
-import { Toaster } from "react-hot-toast";
-import DashboardLayout from "./pages/DashboardLayoutPage";
-import JobsPage from "./pages/JobsPage";
-import ApplyJobPage from "./pages/ApplyJobPage";
+import GoogleLoginPage from './components/auth/GoogleLoginPage';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import PublicRoute from './components/auth/PublicRoute';
+import { Toaster } from 'react-hot-toast';
+import DashboardLayout from './pages/DashboardLayoutPage';
+import JobsPage from './pages/JobsPage';
+import ApplyJobPage from './pages/ApplyJobPage';
 
 export const App = () => {
   return (

@@ -1,12 +1,9 @@
-"use client";
-import { Mic } from "lucide-react";
-import { GoogleIcon } from "../icon/GoogleIcon";
-import { google_login } from "../../utils/googleAuth";
-
-
+'use client';
+import { Mic } from 'lucide-react';
+import { GoogleIcon } from '../icon/GoogleIcon';
+import { google_login } from '../../utils/googleAuth';
 
 export default function LoginModel() {
-
   return (
     // Changed absolute positioning to drop down from the parent container
     <div className="absolute top-[calc(100%+12px)] md:right-0 md:left-auto left-1/2 md:translate-x-0 -translate-x-1/2 z-50 w-[320px] max-w-[90vw] bg-white border border-gray-200 p-8 shadow-2xl rounded-2xl">
@@ -36,12 +33,15 @@ export default function LoginModel() {
       </div>
 
       {/* Auth Button */}
-      <button onClick={google_login} className="flex items-center justify-center gap-3 w-full py-4 px-4 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 font-medium group relative overflow-hidden shadow-sm mt-4">
+      <button
+        onClick={google_login}
+        className="flex items-center justify-center gap-3 w-full py-4 px-4 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 font-medium group relative overflow-hidden shadow-sm mt-4"
+      >
         {/* Hover gradient effect inside button */}
         <div className="absolute inset-0 bg-linear-to-r from-transparent via-[#6c63ff]/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
 
         <GoogleIcon />
-        <span  className="text-[14px] text-gray-600 group-hover:text-gray-900 transition-colors cursor-pointer">
+        <span className="text-[14px] text-gray-600 group-hover:text-gray-900 transition-colors cursor-pointer">
           Continue with Google
         </span>
       </button>

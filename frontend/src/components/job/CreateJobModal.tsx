@@ -1,6 +1,6 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 interface CreateJobModalProps {
   isOpen: boolean;
@@ -11,35 +11,35 @@ interface CreateJobModalProps {
 export default function CreateJobModal({
   isOpen,
   onClose,
-  onSuccess
+  onSuccess,
 }: CreateJobModalProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
-    title: "",
-    department: "",
-    type: "full-time",
-    location: "",
-    status: "draft",
-    minSalary: "",
-    maxSalary: "",
-    currency: "USD",
-    description: "",
-    skills: "",
-    requirements: "",
-    responsibilities: ""
+    title: '',
+    department: '',
+    type: 'full-time',
+    location: '',
+    status: 'draft',
+    minSalary: '',
+    maxSalary: '',
+    currency: 'USD',
+    description: '',
+    skills: '',
+    requirements: '',
+    responsibilities: '',
   });
 
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = 'unset';
     }
 
     return () => {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = 'unset';
     };
   }, [isOpen]);
 
@@ -75,8 +75,8 @@ export default function CreateJobModal({
         salary: {
           min: minSalary ? Number(minSalary) : 0,
           max: maxSalary ? Number(maxSalary) : 0,
-          currency: currency
-        }
+          currency: currency,
+        },
       };
       const { data } = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/jobs`,
@@ -93,7 +93,7 @@ export default function CreateJobModal({
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
-        "Failed to create job";
+        'Failed to create job';
       toast.error(errorMessage);
     } finally {
       // Always turn off the loading spinner, whether it succeeded or failed
@@ -101,18 +101,18 @@ export default function CreateJobModal({
     }
     // Reset form
     setFormData({
-      title: "",
-      department: "",
-      type: "full-time",
-      location: "",
-      status: "draft",
-      minSalary: "",
-      maxSalary: "",
-      currency: "USD",
-      description: "",
-      skills: "",
-      requirements: "",
-      responsibilities: ""
+      title: '',
+      department: '',
+      type: 'full-time',
+      location: '',
+      status: 'draft',
+      minSalary: '',
+      maxSalary: '',
+      currency: 'USD',
+      description: '',
+      skills: '',
+      requirements: '',
+      responsibilities: '',
     });
   };
 
@@ -178,12 +178,12 @@ export default function CreateJobModal({
               >
                 <span
                   className={`material-symbols-outlined text-[18px] ${
-                    isGenerating ? "animate-spin" : ""
+                    isGenerating ? 'animate-spin' : ''
                   }`}
                 >
-                  {isGenerating ? "progress_activity" : "auto_awesome"}
+                  {isGenerating ? 'progress_activity' : 'auto_awesome'}
                 </span>
-                {isGenerating ? "Generating..." : "Generate"}
+                {isGenerating ? 'Generating...' : 'Generate'}
               </button>
             </div>
           </div>
@@ -405,7 +405,7 @@ export default function CreateJobModal({
                 Creating...
               </>
             ) : (
-              "Create Job"
+              'Create Job'
             )}
           </button>
         </div>
