@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { Job } from "../../models/job/job.model.js";
-import { send_email } from "../../utils/email.js";
+// import { send_email } from "../../utils/email.js";
 import { Candidate } from "../../models/candidate/candidate.model.js";
 import { Application } from "../../models/application/application.model.js";
 import mongoose, { Types } from "mongoose";
@@ -27,7 +27,7 @@ export const createJob = async (req: Request, res: Response) => {
 
     return res.status(201).json({
       success: true,
-      message: "Job created successfully",
+      message: "Job created successfully"
     });
   } catch (error: any) {
     // Check if the error is mongoose validation error
@@ -250,13 +250,22 @@ export const getJobById = async (req: Request, res: Response) => {
       });
     }
 
-    await send_email();
+    // await send_email();
     // Only send non-sensitive data needed for the form (like Title)
     return res.status(200).json({
       success: true,
       data: {
         title: job.title,
-        skills: job.skills
+        description: job.description,
+        type: job.type,
+        location:job.location,
+        salary: {
+          min: job.salary?.min,
+          max: job.salary?.max,
+          currency: job.salary?.currency
+        },
+        skills: job.skills,
+        responsibilities: job.responsibilities
       }
     });
   } catch (error: any) {
@@ -268,7 +277,6 @@ export const getJobById = async (req: Request, res: Response) => {
     return res.status(500).json({ success: false, message: "Server Error" });
   }
 };
-
 
 /**
  * @POST /apply/:jobId
@@ -342,10 +350,10 @@ export const submitApplication = async (req: Request, res: Response) => {
       verifiedFormData;
 
     if (!name || !email) {
-        return res.status(400).json({ 
-            success: false, 
-            message: "Candidate name and email are strictly required." 
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Candidate name and email are strictly required."
+      });
     }
     // Validate incoming data
     if (!jobId || !mongoose.Types.ObjectId.isValid(jobId)) {
@@ -385,7 +393,7 @@ export const submitApplication = async (req: Request, res: Response) => {
         latestResumeUrl: resumeURL
       },
       {
-        returnDocument:"after",
+        returnDocument: "after",
         upsert: true,
         setDefaultsOnInsert: true,
         runValidators: true
