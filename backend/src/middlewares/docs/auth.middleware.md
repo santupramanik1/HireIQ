@@ -17,7 +17,7 @@ Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.xxx.yyy`
 - Check if the header contain `Bearer` token or not if not return
 
 ```js
-return { message: "Unauthorize" };
+return { message: 'Unauthorize' };
 ```
 
 - If the header contain `Bearer` token then extract the token from it
@@ -40,7 +40,7 @@ role: "recruiter"
 req.user = {
   userId,
   email,
-  role
+  role,
 };
 ```
 

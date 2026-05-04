@@ -6,7 +6,7 @@
     "outDir": "./dist",
 
     // Resolve multer-storage-cloudinary from local declaration
-     "typeRoots": ["./node_modules/@types", "./src/types"],
+    "typeRoots": ["./node_modules/@types", "./src/types"],
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
@@ -42,7 +42,7 @@
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-    "skipLibCheck": true,
+    "skipLibCheck": true
   },
   "include": ["src/**/*"]
 }

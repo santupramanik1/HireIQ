@@ -1,25 +1,25 @@
-import type { Request, Response } from "express";
-import { Job } from "../../models/job/job.model.js";
+import type { Request, Response } from 'express';
+import { Job } from '../../models/job/job.model.js';
 // import { send_email } from "../../utils/email.js";
-import { Candidate } from "../../models/candidate/candidate.model.js";
-import { Application } from "../../models/application/application.model.js";
-import mongoose, { Types } from "mongoose";
-import { uploadToCloudinary } from "../../config/cloudinary.js";
-import axios from "axios";
-import { ResumeAnalysis } from "../../models/resume/resumeAnalysis.model.js";
+import { Candidate } from '../../models/candidate/candidate.model.js';
+import { Application } from '../../models/application/application.model.js';
+import mongoose, { Types } from 'mongoose';
+import { uploadToCloudinary } from '../../config/cloudinary.js';
+import axios from 'axios';
+import { ResumeAnalysis } from '../../models/resume/resumeAnalysis.model.js';
 
 //PRIVATE: CREATE A NEW JOB
 export const createJob = async (req: Request, res: Response) => {
   try {
     // Ensure user is authenticated(handled by JWT middleware ,but good to double-check)
     if (!req.user) {
-      return res.status(401).json({ success: false, message: "Unauthorized" });
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
 
     // Attach the recruiter's ID to the job data
     const jobData = {
       ...req.body,
-      createdBy: req.user?.userId
+      createdBy: req.user?.userId,
     };
 
     const newJob = new Job(jobData);
@@ -27,11 +27,11 @@ export const createJob = async (req: Request, res: Response) => {
 
     return res.status(201).json({
       success: true,
-      message: "Job created successfully"
+      message: 'Job created successfully',
     });
   } catch (error: any) {
     // Check if the error is mongoose validation error
-    if (error.name === "ValidationError") {
+    if (error.name === 'ValidationError') {
       // Extract all custom error message that is defined in the schema
       const validationErrors = Object.values(error.errors).map(
         (err: any) => err.message
@@ -40,16 +40,16 @@ export const createJob = async (req: Request, res: Response) => {
       // Send a 400 Bad Request response with the exact messages
       return res.status(400).json({
         success: false,
-        message: "validation failed",
-        errors: validationErrors
+        message: 'validation failed',
+        errors: validationErrors,
       });
     }
 
     // Handle any other unexpected server errors
-    console.error("Unexpected error creating job:", error);
+    console.error('Unexpected error creating job:', error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error"
+      message: 'Internal Server Error',
     });
   }
 };
@@ -66,7 +66,7 @@ export const updateJob = async (req: Request, res: Response) => {
     if (!job) {
       return res.status(404).json({
         success: false,
-        message: "Job not found"
+        message: 'Job not found',
       });
     }
 
@@ -74,7 +74,7 @@ export const updateJob = async (req: Request, res: Response) => {
     if (job.createdBy.toString() !== req.user?.userId) {
       return res.status(403).json({
         success: false,
-        message: "You are not authorized to update this job"
+        message: 'You are not authorized to update this job',
       });
     }
 
@@ -88,34 +88,34 @@ export const updateJob = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       success: true,
-      message: "Job updated successfully",
-      job
+      message: 'Job updated successfully',
+      job,
     });
   } catch (error: any) {
     // Handle mongoose validation Error
-    if (error.name === "ValidationError") {
+    if (error.name === 'ValidationError') {
       const validationErrors = Object.values(error.errors).map(
         (err: any) => err.message
       );
 
       return res.status(400).json({
         success: false,
-        message: "Validation failed",
-        errors: validationErrors
+        message: 'Validation failed',
+        errors: validationErrors,
       });
     }
 
     // Handle invalid MongoDB ID format errors (e.g., if someone passes "123" as an ID)
-    if (error.name === "CastError" && error.kind === "ObjectId") {
+    if (error.name === 'CastError' && error.kind === 'ObjectId') {
       return res.status(400).json({
         success: false,
-        message: "Invalid Job ID format"
+        message: 'Invalid Job ID format',
       });
     }
     // Unexpected server Error
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error"
+      message: 'Internal Server Error',
     });
   }
 };
@@ -131,7 +131,7 @@ export const deleteJob = async (req: Request, res: Response) => {
     if (!job) {
       return res.status(404).json({
         success: false,
-        message: "Job not found"
+        message: 'Job not found',
       });
     }
 
@@ -139,7 +139,7 @@ export const deleteJob = async (req: Request, res: Response) => {
     if (job.createdBy.toString() !== req.user?.userId) {
       return res.status(403).json({
         success: false,
-        message: "You are not authorized to delete this job"
+        message: 'You are not authorized to delete this job',
       });
     }
 
@@ -147,21 +147,21 @@ export const deleteJob = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       success: true,
-      message: "Job deleted successfully"
+      message: 'Job deleted successfully',
     });
   } catch (error: any) {
     // Handle invalid MongoDB ID format errors
-    if (error.name === "CastError" && error.kind === "ObjectId") {
+    if (error.name === 'CastError' && error.kind === 'ObjectId') {
       return res.status(400).json({
         success: false,
-        message: "Invalid Job ID format"
+        message: 'Invalid Job ID format',
       });
     }
 
     // Catch-all for unexpected server errors
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error"
+      message: 'Internal Server Error',
     });
   }
 };
@@ -198,7 +198,7 @@ export const getJobs = async (req: Request, res: Response) => {
     // Search by keyword in the title (e.g., ?keyword=developer)
     // $options: "i" makes it case-insensitive
     if (req.query.keyword) {
-      queryObj.title = { $regex: req.query.keyword, $options: "i" };
+      queryObj.title = { $regex: req.query.keyword, $options: 'i' };
     }
 
     // Execute DB query
@@ -206,7 +206,7 @@ export const getJobs = async (req: Request, res: Response) => {
       .sort({ createdAt: -1 }) // Sort by newest jobs first
       .skip(skip) // Skip jobs from previous pages
       .limit(limit) // Limit to the requested number of jobs
-      .populate("createdBy", "name email"); // Pull in the recruiter's name/email
+      .populate('createdBy', 'name email'); // Pull in the recruiter's name/email
 
     // Get the total count of jobs matching the filters
     const totalJobs = await Job.countDocuments(queryObj);
@@ -218,14 +218,14 @@ export const getJobs = async (req: Request, res: Response) => {
         totalPages: Math.ceil(totalJobs / limit),
         currentPage: page,
         jobsPerPage: limit,
-        jobs
-      }
+        jobs,
+      },
     });
   } catch (error: any) {
-    console.error("Error in getJobs controller: ", error);
+    console.error('Error in getJobs controller: ', error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error"
+      message: 'Internal Server Error',
     });
   }
 };
@@ -243,10 +243,10 @@ export const getJobById = async (req: Request, res: Response) => {
     const job = await Job.findById(jobId);
 
     // Check if the job is exist or it is in active mode
-    if (!job || job.status !== "active") {
+    if (!job || job.status !== 'active') {
       return res.status(404).json({
         success: false,
-        message: "Job not found or applications are closed."
+        message: 'Job not found or applications are closed.',
       });
     }
 
@@ -258,23 +258,23 @@ export const getJobById = async (req: Request, res: Response) => {
         title: job.title,
         description: job.description,
         type: job.type,
-        location:job.location,
+        location: job.location,
         salary: {
           min: job.salary?.min,
           max: job.salary?.max,
-          currency: job.salary?.currency
+          currency: job.salary?.currency,
         },
         skills: job.skills,
-        responsibilities: job.responsibilities
-      }
+        responsibilities: job.responsibilities,
+      },
     });
   } catch (error: any) {
-    if (error.name === "CastError" && error.kind === "ObjectId") {
+    if (error.name === 'CastError' && error.kind === 'ObjectId') {
       return res
         .status(400)
-        .json({ success: false, message: "Invalid Job Link" });
+        .json({ success: false, message: 'Invalid Job Link' });
     }
-    return res.status(500).json({ success: false, message: "Server Error" });
+    return res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
 
@@ -290,7 +290,7 @@ export const uploadAndExtract = async (req: Request, res: Response) => {
     if (!jobId || !Types.ObjectId.isValid(jobId)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid job ID format"
+        message: 'Invalid job ID format',
       });
     }
 
@@ -298,38 +298,46 @@ export const uploadAndExtract = async (req: Request, res: Response) => {
     if (!req.file?.buffer) {
       return res
         .status(400)
-        .json({ success: false, message: "Resume file is required." });
+        .json({ success: false, message: 'Resume file is required.' });
     }
 
     const { secure_url: resumeURL } = await uploadToCloudinary(
       req.file.buffer,
       req.file.originalname
     );
-    console.log("Resume uploaded:", resumeURL);
+    console.log('Resume uploaded:', resumeURL);
 
     const pythonServiceUrl =
-      process.env.PYTHON_SERVICE_URL || "http://localhost:7000";
+      process.env.PYTHON_SERVICE_URL || 'http://localhost:7000';
 
     const aiResponse = await axios.post(`${pythonServiceUrl}/extract`, {
       url: resumeURL,
       jobId: jobId,
-      userId: req.user?.userId // Assuming you have user ID from your auth middleware
+      userId: req.user?.userId, // Assuming you have user ID from your auth middleware
     });
 
     const extractedResumeData = aiResponse.data;
     return res.status(200).json({
       success: true,
-      message: "Resume uploaded Successfully",
+      message: 'Resume uploaded Successfully',
       raw_resume_text: extractedResumeData.raw_resume_text,
       candidate_data: extractedResumeData.candidate_data,
-      resumeUrl: resumeURL
+      resumeUrl: resumeURL,
     });
   } catch (error: any) {
+    console.error('Resume Parsing  Error:', error);
+    if (error.isAxiosError) {
+      return res.status(503).json({
+        success: false,
+        message:
+          'Our evaluation engine is currently busy. Please try applying again in a few minutes.',
+      });
+    }
     //  Server error
     res.status(500).json({
       success: false,
       message: `Internal server error: ${error}`,
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -352,32 +360,32 @@ export const submitApplication = async (req: Request, res: Response) => {
     if (!name || !email) {
       return res.status(400).json({
         success: false,
-        message: "Candidate name and email are strictly required."
+        message: 'Candidate name and email are strictly required.',
       });
     }
     // Validate incoming data
     if (!jobId || !mongoose.Types.ObjectId.isValid(jobId)) {
       return res
         .status(400)
-        .json({ success: false, message: "Invalid Job ID" });
+        .json({ success: false, message: 'Invalid Job ID' });
     }
 
     if (!verifiedFormData || !rawResumeText || !resumeURL) {
       return res.status(400).json({
         success: false,
         message:
-          "Missing required application data. Ensure form data, raw text, and resume URL are provided."
+          'Missing required application data. Ensure form data, raw text, and resume URL are provided.',
       });
     }
 
     const job = await Job.findById(jobId);
     if (!job) {
-      return res.status(404).json({ success: false, message: "Job not found" });
+      return res.status(404).json({ success: false, message: 'Job not found' });
     }
-    if (job.status !== "active") {
+    if (job.status !== 'active') {
       return res
         .status(410)
-        .json({ success: false, message: "Applications are closed." });
+        .json({ success: false, message: 'Applications are closed.' });
     }
 
     // If email already exist then update the resume ,if not create new candidate
@@ -390,13 +398,13 @@ export const submitApplication = async (req: Request, res: Response) => {
         githubUrl: githubUrl?.trim(),
         location: location?.trim(),
         skills: skills || [],
-        latestResumeUrl: resumeURL
+        latestResumeUrl: resumeURL,
       },
       {
-        returnDocument: "after",
+        returnDocument: 'after',
         upsert: true,
         setDefaultsOnInsert: true,
-        runValidators: true
+        runValidators: true,
       }
     );
 
@@ -404,13 +412,13 @@ export const submitApplication = async (req: Request, res: Response) => {
     const jobObjectId = new mongoose.Types.ObjectId(jobId);
     const existingApplication = await Application.findOne({
       jobID: jobObjectId,
-      candidateID: candidate._id
+      candidateID: candidate._id,
     });
 
     if (existingApplication) {
       return res.status(409).json({
         success: false,
-        message: "You have already applied for this position"
+        message: 'You have already applied for this position',
       });
     }
 
@@ -419,12 +427,12 @@ export const submitApplication = async (req: Request, res: Response) => {
 
     // 4. Send all 3 pieces to the Python AI Match Engine
     const pythonServiceUrl =
-      process.env.PYTHON_SERVICE_URL || "http://localhost:7000";
+      process.env.PYTHON_SERVICE_URL || 'http://localhost:7000';
 
     const aiResponse = await axios.post(`${pythonServiceUrl}/evaluate-match`, {
       jd_text: jdText,
       form_data: verifiedFormData,
-      raw_resume: rawResumeText
+      raw_resume: rawResumeText,
     });
 
     // Extract the evaluation payload
@@ -434,7 +442,7 @@ export const submitApplication = async (req: Request, res: Response) => {
     const application = await Application.create({
       jobID: jobObjectId,
       candidateID: candidate._id,
-      status: "applied"
+      status: 'applied',
     });
 
     // Save the AI Analysis
@@ -446,32 +454,32 @@ export const submitApplication = async (req: Request, res: Response) => {
       matchedSkill: evaluationResult.matchedSkills,
       missingSkill: evaluationResult.missingSkills,
       strengths: evaluationResult.strengths,
-      areasToImprove: evaluationResult.areasToImprove
+      areasToImprove: evaluationResult.areasToImprove,
     });
 
     return res.status(201).json({
       success: true,
       message:
-        "Application submitted successfully! We are reviewing your profile.",
+        'Application submitted successfully! We are reviewing your profile.',
       data: {
         applicationId: application._id,
-        status: application.status
-      }
+        status: application.status,
+      },
     });
   } catch (error: any) {
-    console.error("Evaluation Error:", error);
+    console.error('Evaluation Error:', error);
 
     if (error.isAxiosError) {
       return res.status(503).json({
         success: false,
         message:
-          "Our evaluation engine is currently busy. Please try applying again in a few minutes."
+          'Our evaluation engine is currently busy. Please try applying again in a few minutes.',
       });
     }
 
     return res.status(500).json({
       success: false,
-      message: `Failed to submit application: ${error.message}`
+      message: `Failed to submit application: ${error.message}`,
     });
   }
 };

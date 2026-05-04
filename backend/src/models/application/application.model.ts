@@ -1,28 +1,28 @@
-import mongoose, { Schema } from "mongoose";
-import type { IApplication } from "./application.interface.js";
+import mongoose, { Schema } from 'mongoose';
+import type { IApplication } from './application.interface.js';
 
 const applicationSchema = new Schema<IApplication>(
   {
     jobID: {
       type: Schema.Types.ObjectId,
-      ref: "Job",
-      required: true
+      ref: 'Job',
+      required: true,
     },
     candidateID: {
       type: Schema.Types.ObjectId,
-      ref: "Candidate",
-      required: true
+      ref: 'Candidate',
+      required: true,
     },
 
     status: {
       type: String,
-      enum: ["applied", "screening", "interviewing", "offered", "rejected"],
-      default: "applied"
+      enum: ['applied', 'screening', 'interviewing', 'offered', 'rejected'],
+      default: 'applied',
     },
     finalScore: {
       type: Number,
-      default: 0
-    }
+      default: 0,
+    },
   },
   { timestamps: true }
 );
@@ -37,6 +37,6 @@ applicationSchema.index({ jobID: 1, status: 1 });
 applicationSchema.index({ candidateID: 1 });
 
 export const Application = mongoose.model<IApplication>(
-  "Application",
+  'Application',
   applicationSchema
 );

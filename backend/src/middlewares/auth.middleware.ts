@@ -1,5 +1,5 @@
-import type { NextFunction, Request, Response } from "express";
-import { verifyAccessToken } from "../utils/jwt.js";
+import type { NextFunction, Request, Response } from 'express';
+import { verifyAccessToken } from '../utils/jwt.js';
 
 export const isAuthenticated = async (
   req: Request,
@@ -12,7 +12,7 @@ export const isAuthenticated = async (
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: "Access denied. No token provided."
+        message: 'Access denied. No token provided.',
       });
     }
 
@@ -25,7 +25,7 @@ export const isAuthenticated = async (
   } catch (error) {
     return res.status(401).json({
       success: false,
-      message: "Session expired or invalid token."
+      message: 'Session expired or invalid token.',
     });
   }
 };

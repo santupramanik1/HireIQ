@@ -1,47 +1,47 @@
-import mongoose, { Schema } from "mongoose";
-import type { IResumeAnalysis } from "./resumeAnalysis.interface.js";
+import mongoose, { Schema } from 'mongoose';
+import type { IResumeAnalysis } from './resumeAnalysis.interface.js';
 
 const resumeAnalysisSchema = new Schema<IResumeAnalysis>({
   applicationId: {
     type: Schema.Types.ObjectId,
-    ref: "Application",
+    ref: 'Application',
     required: true,
-    unique: true // One application has exactly one analysis
+    unique: true, // One application has exactly one analysis
   },
   matchScore: {
     type: Number,
-    required: true
+    required: true,
   },
   score_reasoning: {
-    type: String
+    type: String,
   },
   matchedSkill: {
     type: [String],
-    default: []
+    default: [],
   },
   missingSkill: {
     type: [String],
-    default: []
+    default: [],
   },
   strengths: {
     type: [String],
-    default: []
+    default: [],
   },
   areasToImprove: {
     type: [String],
-    default: []
+    default: [],
   },
   summary: {
     type: String,
-    required: true
+    required: true,
   },
   analyzedAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
 export const ResumeAnalysis = mongoose.model<IResumeAnalysis>(
-  "ResumeAnalysis",
+  'ResumeAnalysis',
   resumeAnalysisSchema
 );

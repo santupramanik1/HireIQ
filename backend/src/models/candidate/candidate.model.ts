@@ -1,6 +1,6 @@
-import mongoose, { Model, Schema } from "mongoose";
-import type { ICandidate } from "./candidate.interface.js";
-import validator from "validator";
+import mongoose, { Model, Schema } from 'mongoose';
+import type { ICandidate } from './candidate.interface.js';
+import validator from 'validator';
 
 const candidateSchema = new Schema<ICandidate>(
   {
@@ -15,18 +15,18 @@ const candidateSchema = new Schema<ICandidate>(
       unique: true,
       lowercase: true,
       trim: true,
-      validate: [validator.isEmail, "Please provide a valid Email address"],
+      validate: [validator.isEmail, 'Please provide a valid Email address'],
     },
-    phone: { type: String, default: "" },
-    linkedInUrl: { type: String, default: "" },
-    githubUrl: { type: String, default: "" },
-    location: { type: String, default: "" },
+    phone: { type: String, default: '' },
+    linkedInUrl: { type: String, default: '' },
+    githubUrl: { type: String, default: '' },
+    location: { type: String, default: '' },
     latestResumeUrl: { type: String, required: true },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 export const Candidate = mongoose.model<ICandidate>(
-  "Candidate",
-  candidateSchema,
+  'Candidate',
+  candidateSchema
 );

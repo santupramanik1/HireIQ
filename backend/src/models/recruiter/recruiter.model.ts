@@ -1,20 +1,20 @@
-import mongoose, { model, Schema } from "mongoose";
-import { UserRole, type IUser } from "./recruiter.interface.js";
+import mongoose, { model, Schema } from 'mongoose';
+import { UserRole, type IUser } from './recruiter.interface.js';
 
 const userSchema = new Schema<IUser>(
   {
     firstname: {
       type: String,
-      required: [true, "firstame is required"],
+      required: [true, 'firstame is required'],
       trim: true,
     },
-     lastname: {
+    lastname: {
       type: String,
       trim: true,
     },
     email: {
       type: String,
-      required: [true, "Email is required"],
+      required: [true, 'Email is required'],
       unique: true,
       lowercase: true,
     },
@@ -26,12 +26,12 @@ const userSchema = new Schema<IUser>(
     picture: {
       type: String,
     },
-    isActive:{
-      type:Boolean,
-      default:false
-    }
+    isActive: {
+      type: Boolean,
+      default: false,
+    },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
-export const User = model<IUser>("User", userSchema);
+export const User = model<IUser>('User', userSchema);

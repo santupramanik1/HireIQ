@@ -1,5 +1,6 @@
 import axios from 'axios';
 import React, { useState, useEffect, useRef } from 'react';
+import toast from 'react-hot-toast';
 import { useParams, useNavigate } from 'react-router-dom';
 
 type SubmissionMethod = 'upload' | 'manual';
@@ -45,6 +46,10 @@ export default function ApplyJobPage() {
   const [isParsing, setIsParsing] = useState(false);
   const [parsingStep, setParsingStep] = useState(0);
 
+  // Backend Resume Parsing State
+  const [resumeUrl, setResumeUrl] = useState('');
+  const [rawResumeText, setRawResumeText] = useState('');
+
   // Get Jobid from URL
   const { jobId } = useParams();
 
@@ -54,6 +59,10 @@ export default function ApplyJobPage() {
     lastName: '',
     email: '',
     phone: '',
+    linkedInUrl: '', // Hidden background field
+    githubUrl: '', // Hidden background field
+    location: '', // Hidden background field
+    skills: [], // Hidden background field
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -83,23 +92,60 @@ export default function ApplyJobPage() {
   }, [isParsing, parsingMessages.length]);
 
   // Handle File Upload & Mock AI Process
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setIsParsing(true);
       setParsingStep(0);
 
-      // Simulate the backend LLM parsing delay (4 seconds total)
-      setTimeout(() => {
+      try {
+        const formDataObj = new FormData();
+        formDataObj.append('resume', file);
+
+        // Send the PDF to the backend
+        const { data } = await axios.post(
+          `${import.meta.env.VITE_API_BASE_URL}/jobs/${jobId}/applications/extract-resume`,
+          formDataObj,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+            withCredentials: true,
+          }
+        );
+
+        const parsedData = data.candidate_data;
+
+        // Save the raw text and URL for the final submission
+        setRawResumeText(data.raw_resume_text);
+        setResumeUrl(data.resumeUrl);
+
         setIsParsing(false);
-        // Auto-fill the dummy data
+
+        // Split the name into firstname and lastname
+        const name = parsedData.candidate_name.split(' ');
+        const firstName = name[0];
+        const lastName = name[1];
+
         setFormData({
-          firstName: 'Santu',
-          lastName: 'Pramanik',
-          email: 'santu.dev@example.com',
-          phone: '+91 98765 43210',
+          firstName: firstName || '',
+          lastName: lastName || '',
+          email: parsedData.email || '',
+          phone: parsedData.phone || '',
+          linkedInUrl: parsedData.linkedInUrl || '',
+          githubUrl: parsedData.githubUrl || '',
+          location: parsedData.location || '',
+          skills: parsedData.skills || [],
         });
-      }, 4000);
+      } catch (error) {
+        setIsParsing(false);
+        console.error('Error parsing resume:', error);
+
+        // Reset file input so they can try again if they want
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      }
     }
   };
 
@@ -108,15 +154,43 @@ export default function ApplyJobPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate final API call
-    setTimeout(() => {
+    const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+
+    const payload = {
+      verifiedFormData: {
+        name: fullName, // <-- THIS IS THE FIX
+        email: formData.email,
+        phone: formData.phone,
+
+        // Include your hidden fields from the AI parser
+        linkedInUrl: formData.linkedInUrl,
+        githubUrl: formData.githubUrl,
+        location: formData.location,
+        skills: formData.skills,
+      },
+      rawResumeText: rawResumeText, // Make sure this state exists from your upload step
+      resumeURL: resumeUrl, // Make sure this state exists from your upload step
+    };
+    try {
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/jobs/${jobId}/applications`,
+        payload,
+        {
+          withCredentials: true,
+        }
+      );
       setIsSubmitting(false);
       setIsSuccess(true);
-    }, 2500);
+
+      toast.success(data.message);
+    } catch (error: any) {
+      setIsSubmitting(false);
+      toast.error(error.response?.data?.message || 'Application failed');
+    }
   };
 
   // Fetch the job details from the backend
@@ -300,14 +374,22 @@ export default function ApplyJobPage() {
                         <button
                           type="button"
                           onClick={() => setMethod('upload')}
-                          className={`flex-1 py-2 cursor-pointer text-sm font-medium rounded-md transition-all ${method === 'upload' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                          className={`flex-1 py-2 cursor-pointer text-sm font-medium rounded-md transition-all ${
+                            method === 'upload'
+                              ? 'bg-white shadow text-blue-600'
+                              : 'text-gray-500 hover:text-gray-700'
+                          }`}
                         >
                           ✨ AI Auto-Fill Resume
                         </button>
                         <button
                           type="button"
                           onClick={() => setMethod('manual')}
-                          className={`flex-1 py-2 text-sm font-medium cursor-pointer rounded-md transition-all ${method === 'manual' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                          className={`flex-1 py-2 text-sm font-medium cursor-pointer rounded-md transition-all ${
+                            method === 'manual'
+                              ? 'bg-white shadow text-blue-600'
+                              : 'text-gray-500 hover:text-gray-700'
+                          }`}
                         >
                           Fill Manually
                         </button>
@@ -329,19 +411,12 @@ export default function ApplyJobPage() {
                           </div>
                         ) : (
                           <label className="h-full w-full border-2 border-dashed border-blue-300 bg-blue-50/50 rounded-lg flex flex-col items-center justify-center p-6 hover:bg-blue-50 transition-colors cursor-pointer group">
-                            <svg
-                              className="w-8 h-8 text-blue-400 group-hover:text-blue-600 mb-3 transition-transform group-hover:-translate-y-1"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
+                            <span
+                              className="material-symbols-outlined  text-blue-400 group-hover:text-blue-600 mb-3 transition-transform group-hover:-translate-y-1"
+                              style={{ fontSize: '40px' }}
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                              ></path>
-                            </svg>
+                              cloud_upload
+                            </span>
                             <p className="text-sm font-semibold text-blue-900">
                               Upload resume to auto-fill
                             </p>
@@ -362,7 +437,11 @@ export default function ApplyJobPage() {
 
                     {/* Shared Form Fields */}
                     <div
-                      className={`space-y-4 transition-opacity duration-500 ${isParsing ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}
+                      className={`space-y-4 transition-opacity duration-500 ${
+                        isParsing
+                          ? 'opacity-40 pointer-events-none'
+                          : 'opacity-100'
+                      }`}
                     >
                       <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -449,27 +528,10 @@ export default function ApplyJobPage() {
                     >
                       {isSubmitting ? (
                         <>
-                          <svg
-                            className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                          >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                            ></circle>
-                            <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                          </svg>
-                          Sending Application...
+                          <>
+                            <div className="animate-spin -ml-1 mr-3 h-5 w-5 border-2 border-white/30 border-t-white rounded-full"></div>
+                            Sending Application...
+                          </>
                         </>
                       ) : (
                         'Submit Application'

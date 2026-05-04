@@ -1,6 +1,6 @@
-import { OAuth2Client } from "google-auth-library";
-import { User } from "../models/recruiter/recruiter.model.js";
-import { generateAcessToken, generateRefreshToken } from "../utils/jwt.js";
+import { OAuth2Client } from 'google-auth-library';
+import { User } from '../models/recruiter/recruiter.model.js';
+import { generateAcessToken, generateRefreshToken } from '../utils/jwt.js';
 // import { redisClient } from "./redis.js";
 
 const client_id = process.env.GOOGLE_CLIENT_ID;
@@ -8,13 +8,13 @@ const client_secret = process.env.GOOGLE_CLIENT_SECRET;
 const redirect_uri = process.env.REDIRECT_URI;
 
 if (!client_id || !client_secret || !redirect_uri) {
-  throw new Error("Missing OAuth environment variables! Check your .env file.");
+  throw new Error('Missing OAuth environment variables! Check your .env file.');
 }
 
 export const GOOGLE_CLIENT = new OAuth2Client({
   clientId: client_id,
   clientSecret: client_secret,
-  redirectUri: redirect_uri
+  redirectUri: redirect_uri,
 });
 
 type GoogleUser = {
@@ -33,7 +33,7 @@ export interface GoogleLoginResult {
     role: string;
     user: {
       firstname: string;
-      lastname?:string
+      lastname?: string;
       email: string;
       profilePicture: string;
     };
@@ -50,14 +50,14 @@ export async function googleLogin(
   if (payload.given_name === undefined) {
     return {
       success: false,
-      message: "`firstname` is not provided"
+      message: '`firstname` is not provided',
     };
   }
 
   if (payload.email === undefined) {
     return {
       success: false,
-      message: "`email` is not provided"
+      message: '`email` is not provided',
     };
   }
 
@@ -70,18 +70,18 @@ export async function googleLogin(
         firstname: payload.given_name,
         lastname: payload.family_name,
         email: payload.email,
-        picture: payload.picture || "",
-        isActive: true
+        picture: payload.picture || '',
+        isActive: true,
       });
     }
 
     if (!user || !user._id)
-      throw new Error("Failed to process user in database");
+      throw new Error('Failed to process user in database');
 
     const tokenPayload = {
       userId: user._id.toString(),
       email: user.email,
-      role: user.role
+      role: user.role,
     };
 
     // Generate the Tokens
@@ -96,20 +96,20 @@ export async function googleLogin(
     // FIX 2 & 3: Cleaned up the return brackets and mapped user.picture to profilePicture
     return {
       success: true,
-      message: "Login successful",
+      message: 'Login successful',
       data: {
         role: user.role,
         user: {
           firstname: user.firstname,
-          lastname:user.lastname||"",
+          lastname: user.lastname || '',
           email: user.email,
-          profilePicture: user.picture || "" // Maps your DB field to the React interface
-        }
+          profilePicture: user.picture || '', // Maps your DB field to the React interface
+        },
       },
-      tokens: { accessToken, refreshToken }
+      tokens: { accessToken, refreshToken },
     };
   } catch (error) {
-    console.error("Database operation failed:", error);
+    console.error('Database operation failed:', error);
     throw error;
   }
 }

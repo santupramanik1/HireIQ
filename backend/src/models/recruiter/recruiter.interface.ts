@@ -1,17 +1,17 @@
-import type { Document } from "mongoose";
+import type { Document } from 'mongoose';
 
 export enum UserRole {
-  RECRUITER = "recruiter",
-  ADMIN = "admin",
+  RECRUITER = 'recruiter',
+  ADMIN = 'admin',
 }
 
 export interface IUser extends Document {
   firstname: string;
-  lastname?:string|undefined
+  lastname?: string | undefined;
   email: string;
   role: UserRole;
   picture?: string; // Profile picture from Google
-  isActive:boolean
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -1,5 +1,5 @@
-import multer from "multer";
-import type { Request } from "express";
+import multer from 'multer';
+import type { Request } from 'express';
 
 const fileFilter = (
   _req: Request,
@@ -7,8 +7,8 @@ const fileFilter = (
   cb: multer.FileFilterCallback
 ) => {
   if (
-    file.mimetype === "application/pdf" ||
-    file.mimetype === "application/octet-stream"
+    file.mimetype === 'application/pdf' ||
+    file.mimetype === 'application/octet-stream'
   ) {
     cb(null, true);
   } else {
@@ -22,5 +22,5 @@ const fileFilter = (
 export const uploadResume = multer({
   storage: multer.memoryStorage(),
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }
+  limits: { fileSize: 5 * 1024 * 1024 },
 });
