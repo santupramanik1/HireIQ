@@ -7,6 +7,7 @@ import PublicRoute from "./components/auth/PublicRoute";
 import { Toaster } from "react-hot-toast";
 import DashboardLayout from "./pages/DashboardLayoutPage";
 import JobsPage from "./pages/JobsPage";
+import ApplyJobPage from "./pages/ApplyJobPage";
 
 export const App = () => {
   return (
@@ -15,6 +16,8 @@ export const App = () => {
       <Routes>
         {/* Anyone can see the landing page, logged in or not */}
         <Route path="/" element={<LayoutPage />} />
+        {/* Public Route for candidates */}
+        <Route path="/apply/:jobId" element={<ApplyJobPage />} />
 
         {/* --- PUBLIC ROUTES --- */}
         <Route element={<PublicRoute />}>
@@ -29,7 +32,7 @@ export const App = () => {
               index
               element={
                 <div className="p-8 text-2xl font-bold">
-                 Dashboard Report Coming Soon!!
+                  Dashboard Report Coming Soon!!
                 </div>
               }
             />
