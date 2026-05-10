@@ -8,6 +8,7 @@ import { Toaster } from 'react-hot-toast';
 import DashboardLayout from './pages/DashboardLayoutPage';
 import JobsPage from './pages/JobsPage';
 import ApplyJobPage from './pages/ApplyJobPage';
+import CandidateTable from './pages/CandidatesPage';
 
 export const App = () => {
   return (
@@ -39,14 +40,7 @@ export const App = () => {
             <Route path="jobs" element={<JobsPage />} />
 
             {/* Placeholders for your future pages */}
-            <Route
-              path="candidates"
-              element={
-                <div className="p-8 text-2xl font-bold">
-                  Candidates Page Coming Soon!
-                </div>
-              }
-            />
+            <Route path="candidates" element={<CandidateTable />} />
             <Route
               path="schedules"
               element={
