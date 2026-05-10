@@ -1,0 +1,325 @@
+import { useState, useEffect, useRef } from 'react';
+import { Logo } from '../../shared/components/Logo';
+import Vapi from '@vapi-ai/web';
+
+// Call Status
+// enum CallStatus{
+//     INACTIVE='INACTIVE',
+//     CONNECTING='CONNECTING',
+//     ACTIVE='ACTIVE',
+//     FINISHED='FINISHED'
+// }
+
+const vapi = new Vapi(`${import.meta.env.VITE_VAPI_PUBLIC_KEY}`);
+
+export default function ActiveInterviewRoom() {
+  const [isListening, setIsListening] = useState(false);
+  const [isAiSpeaking, setIsAiSpeaking] = useState(true);
+  const [timer, setTimer] = useState(0);
+  const [transcript, setTranscript] = useState([
+    {
+      role: 'ai',
+      text: 'Hello Santu! Great to have you here. To start off, can you tell me about a complex React project you worked on recently?',
+    },
+  ]);
+
+  // Ref to handle auto-scrolling the transcript
+  const transcriptEndRef = useRef<HTMLDivElement>(null);
+
+  // Timer
+  useEffect(() => {
+    const interval = setInterval(() => setTimer((prev) => prev + 1), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60)
+      .toString()
+      .padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
+
+  // Auto-scroll whenever transcript changes
+  useEffect(() => {
+    transcriptEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [transcript, isListening]);
+
+  // Initial AI greeting simulation
+  useEffect(() => {
+    const speakingTimer = setTimeout(() => {
+      setIsAiSpeaking(false);
+    }, 4000); // AI stops speaking after 4 seconds
+    return () => clearTimeout(speakingTimer);
+  }, []);
+
+  // Interactive Mock Conversation Flow
+  const handleToggleMic = () => {
+    if (isListening) {
+      // Manually turn off mic
+      setIsListening(false);
+    } else {
+      // 1. Start listening to candidate
+      setIsAiSpeaking(false);
+      setIsListening(true);
+
+      // 2. Simulate candidate finishing their answer after 3.5 seconds
+      setTimeout(() => {
+        setTranscript((prev) => [
+          ...prev,
+          {
+            role: 'user',
+            text: 'Recently, I built a real-time dashboard using React and WebSockets. I used the Context API for state management to keep it highly performant.',
+          },
+        ]);
+        setIsListening(false);
+
+        // 3. AI takes a brief moment to process the answer
+        setTimeout(() => {
+          setIsAiSpeaking(true); // Waveform starts bouncing again
+
+          // 4. AI responds
+          setTimeout(() => {
+            setTranscript((prev) => [
+              ...prev,
+              {
+                role: 'ai',
+                text: 'That sounds impressive. Using Context API was a good choice. How did you handle WebSocket connection drops and reconnections in that architecture?',
+              },
+            ]);
+
+            // AI finishes speaking
+            setTimeout(() => setIsAiSpeaking(false), 5000);
+          }, 1000);
+        }, 1500);
+      }, 3500);
+    }
+  };
+
+  return (
+    <div className="h-screen bg-[#0B0F19] text-white flex flex-col overflow-hidden font-class">
+      {/* TOP NAVBAR */}
+      <header className="h-16 border-b border-slate-800 flex items-center justify-between px-4 md:px-6 shrink-0 bg-[#0B0F19] z-20">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-indigo-600 rounded flex items-center justify-center">
+            <Logo></Logo>
+          </div>
+          <div className="flex flex-col">
+            <span className="font-bold tracking-tight leading-tight">
+              HireIQ
+            </span>
+            <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider hidden sm:block">
+              Full Stack React Developer
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4 md:gap-6">
+          <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-md">
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+            <span className="text-xs font-mono font-medium text-slate-300">
+              {formatTime(timer)}
+            </span>
+          </div>
+          <button
+            onClick={() => alert('Interview Ended!')}
+            className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 rounded-lg text-sm font-bold transition-all"
+          >
+            End Interview
+          </button>
+        </div>
+      </header>
+
+      {/* MAIN WORKSPACE */}
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+        {/* CENTER STAGE (Video Panels & Controls) */}
+        <div className="flex-1 flex flex-col relative min-w-0">
+          {/* Status Indicator (Top Center) */}
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex gap-2">
+            <span
+              className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-all duration-300 shadow-lg flex items-center gap-2 ${isAiSpeaking ? 'bg-indigo-500/20 border-indigo-500 text-indigo-300 shadow-indigo-500/20' : 'bg-slate-900/80 border-slate-700 text-slate-400 backdrop-blur-md'}`}
+            >
+              {isAiSpeaking && (
+                <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+              )}
+              {isAiSpeaking ? 'AI Speaking' : 'AI Listening'}
+            </span>
+            {isListening && (
+              <span className="px-4 py-1.5 rounded-full text-xs font-bold border border-emerald-500 bg-emerald-500/20 text-emerald-300 shadow-lg shadow-emerald-500/20 flex items-center gap-2 animate-fade-in">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                You are Speaking
+              </span>
+            )}
+          </div>
+
+          {/* Video Grid */}
+          <div className="flex-1 p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 overflow-y-auto">
+            {/* AI Panel */}
+            <div className="bg-[#121214] rounded-2xl border border-slate-800 flex flex-col items-center justify-center relative overflow-hidden group min-h-62.5">
+              {/* Dynamic Background Glow */}
+              <div
+                className={`absolute inset-0 bg-indigo-500/10 blur-3xl rounded-full transition-opacity duration-700 ${isAiSpeaking ? 'opacity-100' : 'opacity-0'}`}
+              ></div>
+
+              <div
+                className={`w-28 h-28 md:w-32 md:h-32 bg-linear-to-tr from-slate-800 to-slate-700 rounded-full flex items-center justify-center border-4 border-[#121214] relative z-10 transition-all duration-500 ${isAiSpeaking ? 'shadow-[0_0_40px_rgba(99,102,241,0.4)] ring-4 ring-indigo-500/50 scale-105' : 'shadow-xl scale-100'}`}
+              >
+                <span className="material-symbols-outlined">chat</span>
+              </div>
+              <h3 className="mt-6 text-lg font-bold text-white relative z-10">
+                AI Interviewer
+              </h3>
+
+              {/* Waveform Visualizer */}
+              <div className="flex items-center justify-center gap-1 h-8 mt-4 w-32 relative z-10">
+                {[...Array(10)].map((_, i) => (
+                  <div
+                    key={i}
+                    className={`w-1.5 bg-indigo-500 rounded-full transition-all duration-300 ${isAiSpeaking ? 'animate-bounce' : 'opacity-20'}`}
+                    style={{
+                      height: isAiSpeaking
+                        ? `${Math.random() * 80 + 20}%`
+                        : '10%',
+                      animationDelay: `${i * 0.05}s`,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Candidate Panel */}
+            <div className="bg-[#121214] rounded-2xl border border-slate-800 flex flex-col items-center justify-center relative overflow-hidden min-h-62.5">
+              {/* Abstract Camera Simulation */}
+              <div className="absolute inset-0 opacity-40">
+                <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-indigo-900/40 blur-[80px] rounded-full animate-[spin_10s_linear_infinite]"></div>
+                <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-blue-900/30 blur-[60px] rounded-full animate-[spin_15s_linear_infinite_reverse]"></div>
+              </div>
+              {/* Candidate Avatar Silhouette */}
+              <div
+                className={`w-28 h-28 md:w-32 md:h-32 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-700 flex items-center justify-center shadow-2xl relative z-10 transition-all duration-300 ${isListening ? 'ring-4 ring-emerald-500/50' : ''}`}
+              >
+                <span className="text-4xl text-slate-400 font-medium tracking-widest">
+                  S
+                </span>
+              </div>
+              <h3 className="mt-6 text-lg font-bold text-white relative z-10">
+                You (Santu)
+              </h3>
+            </div>
+          </div>
+
+          {/* Bottom Control Bar */}
+          <div className="h-24 bg-[#0B0F19] border-t border-slate-800 flex items-center justify-center gap-6 shrink-0 relative z-20">
+            <button
+              onClick={handleToggleMic}
+              className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${isListening ? 'bg-emerald-600 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:bg-emerald-500' : 'bg-slate-800 text-slate-300 border border-slate-700 hover:text-white hover:bg-slate-700'}`}
+              title={isListening ? 'Mute Microphone' : 'Unmute to Speak'}
+            >
+              {isListening ? (
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+                  />
+                  <line
+                    x1="4"
+                    y1="4"
+                    x2="20"
+                    y2="20"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* RIGHT SIDEBAR (Live Transcript) */}
+        <aside className="w-full lg:w-100 xl:w-112.5 bg-[#111622] border-l border-slate-800 flex flex-col z-20 shrink-0">
+          <div className="h-16 px-6 border-b border-slate-800 flex items-center justify-between shrink-0">
+            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+              <span className="material-symbols-outlined">toc</span>
+              Live Transcript
+            </h3>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth">
+            {transcript.map((msg, i) => (
+              <div
+                key={i}
+                className={`flex flex-col ${msg.role === 'ai' ? 'items-start' : 'items-end'} animate-fade-in`}
+              >
+                <span
+                  className={`text-[10px] font-bold uppercase mb-1.5 ${msg.role === 'ai' ? 'text-indigo-400' : 'text-emerald-400'}`}
+                >
+                  {msg.role === 'ai' ? 'AI Interviewer' : 'You'}
+                </span>
+                <div
+                  className={`max-w-[90%] p-4 rounded-2xl text-[15px] leading-relaxed shadow-sm ${msg.role === 'ai' ? 'bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700/50' : 'bg-emerald-600/20 border border-emerald-500/30 text-emerald-50 rounded-tr-none'}`}
+                >
+                  {msg.text}
+                </div>
+              </div>
+            ))}
+
+            {/* Thinking / Typing indicator */}
+            {isListening && (
+              <div className="flex flex-col items-end animate-fade-in">
+                <div className="bg-emerald-600/10 text-emerald-400 p-3 rounded-2xl rounded-tr-none text-xs italic flex items-center gap-2 border border-emerald-500/20">
+                  <span className="flex gap-1">
+                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce"></span>
+                    <span
+                      className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce"
+                      style={{ animationDelay: '0.1s' }}
+                    ></span>
+                    <span
+                      className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce"
+                      style={{ animationDelay: '0.2s' }}
+                    ></span>
+                  </span>
+                  Transcribing...
+                </div>
+              </div>
+            )}
+            {/* Invisible div to scroll to */}
+            <div ref={transcriptEndRef} />
+          </div>
+
+          <div className="p-4 bg-[#0B0F19]/80 border-t border-slate-800 shrink-0 flex items-center justify-center gap-2">
+            <span
+              className="material-symbols-outlined"
+              style={{ fontSize: '18px' }}
+            >
+              lock
+            </span>
+            <p className="text-[10px] text-slate-500 font-medium tracking-wide uppercase">
+              End-to-End Encrypted
+            </p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  );
+}

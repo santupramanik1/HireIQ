@@ -39,7 +39,7 @@ app.use('/api/jobs', applyRouter);
 app.use('/api/jobs', jobRouter);
 
 // Get all candidate who are applied for Job
-app.use('/api/applications',candidateRouter)
+app.use('/api/applications', candidateRouter);
 
 // Database & Services connection
 await connDB();

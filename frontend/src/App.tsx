@@ -12,6 +12,7 @@ import CandidateTable from './pages/CandidatesPage';
 import CandidateInfo from './pages/CandidateInfoPage';
 import StartInterviewPage from './interview/pages/StartInterviewPage';
 import InterviewCompletePage from './interview/pages/InterviewCompletePage';
+import ActiveInterviewRoom from './interview/components/ActiveInterviewRoom';
 
 export const App = () => {
   return (
@@ -66,6 +67,7 @@ export const App = () => {
 
         <Route path="/start-interview" element={<StartInterviewPage />} />
         <Route path="/complete-interview" element={<InterviewCompletePage />} />
+        <Route path="/interview" element={<ActiveInterviewRoom />} />
       </Routes>
     </>
   );
