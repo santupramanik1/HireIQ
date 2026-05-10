@@ -9,6 +9,7 @@ import DashboardLayout from './pages/DashboardLayoutPage';
 import JobsPage from './pages/JobsPage';
 import ApplyJobPage from './pages/ApplyJobPage';
 import CandidateTable from './pages/CandidatesPage';
+import CandidateInfo from './pages/CandidateInfoPage';
 
 export const App = () => {
   return (
@@ -41,6 +42,7 @@ export const App = () => {
 
             {/* Placeholders for your future pages */}
             <Route path="candidates" element={<CandidateTable />} />
+            <Route path="candidate-info/:id" element={<CandidateInfo />} />
             <Route
               path="schedules"
               element={

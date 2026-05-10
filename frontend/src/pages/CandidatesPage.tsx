@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface Candidate {
   applicationId: string;
@@ -14,6 +15,8 @@ export default function CandidateTable() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const navigate=useNavigate()
 
   //   Fetch Data from API
   useEffect(() => {
@@ -118,8 +121,7 @@ export default function CandidateTable() {
                   // --- Awesome Hover Classes Added Here ---
                   className="group relative bg-white border-b border-gray-100 transition-all duration-300 ease-in-out hover:bg-blue-50/30 hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 hover:z-10 cursor-pointer"
                 >
-                  <td className="px-6 py-4">
-                    {/* Added group-hover:text-blue-600 to make the name light up on row hover */}
+                  <td onClick={() => navigate(`/dashboard/candidate-info/${c.applicationId}`)} className="px-6 py-4">
                     <div className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
                       {c.candidateName}
                     </div>
