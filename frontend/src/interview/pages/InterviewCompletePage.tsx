@@ -48,10 +48,10 @@ export default function InterviewCompletePage() {
       </header>
 
       {/* --- Main Content --- */}
-      <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-8">
+      <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-8  ">
         <div className="max-w-2xl w-full flex flex-col items-center text-center animate-fade-in-up">
           {/* Success Icon */}
-          <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mb-6 border border-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.15)]">
+          <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mb-4 border border-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.15)]">
             <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center">
               <svg
                 className="w-6 h-6 text-white"
@@ -70,15 +70,15 @@ export default function InterviewCompletePage() {
           </div>
 
           {/* Headings */}
-          <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight mb-2">
+          <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight mb-1">
             Interview Complete!
           </h1>
-          <p className="text-lg text-indigo-400 font-medium mb-6">
+          <p className="text-lg text-indigo-400 font-medium mb-4">
             Thank you, {candidateName}!
           </p>
 
           {/* Description */}
-          <p className="text-slate-400 text-sm md:text-base leading-relaxed mb-10 max-w-lg">
+          <p className="text-slate-400 text-sm md:text-base leading-relaxed mb-6 max-w-lg">
             Your interview for the{' '}
             <span className="text-white font-semibold">{jobTitle}</span>{' '}
             position has been successfully recorded. Our hiring team will review
@@ -86,7 +86,7 @@ export default function InterviewCompletePage() {
           </p>
 
           {/* Stats Row */}
-          <div className="flex items-center justify-center gap-12 mb-12">
+          <div className="flex items-center justify-center gap-12 mb-6">
             <div className="flex flex-col items-center">
               <span className="text-2xl font-bold text-white">
                 {questionsAnswered}
