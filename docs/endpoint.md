@@ -27,6 +27,7 @@ Protected endpoints used by recruiters to manage job postings on the platform.
 | `POST`   | `/api/jobs`     | Yes           | Create a new job posting.                                                             |
 | `PUT`    | `/api/jobs/:id` | Yes           | Update an existing job posting by its ID.                                             |
 | `DELETE` | `/api/jobs/:id` | Yes           | Delete a job posting by its ID.                                                       |
+| `GET`  | `/api/applications/candidates` | Yes           | Fetch a comprehensive list of all candidates who have applied for any job across the platform. |
 
 ---
 
@@ -43,3 +44,4 @@ Public endpoints used by candidates to view jobs and submit applications.
 | `POST` | `/api/jobs/:id/applications`                | Accepts the final, verified JSON form data, triggers the AI match engine, and saves the application to the database.     |
 
 ---
+
