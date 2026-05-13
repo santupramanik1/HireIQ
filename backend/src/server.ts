@@ -16,6 +16,14 @@ import candidateRouter from './routes/candidate.routes.js';
 
 const app = express();
 
+// Add this simple Health Check route
+app.get('/', (req: Request , res: Response) => {
+  res.status(200).json({
+    success: true,
+    message: 'Welcome to the HireIQ API! The server is running smoothly.'
+  });
+});
+
 // middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
