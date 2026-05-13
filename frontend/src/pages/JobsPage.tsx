@@ -30,7 +30,7 @@ export default function JobsPage() {
   const [activeJobTitle, setActiveJobTitle] = useState('');
   const [activeJobId, setActiveJobId] = useState('');
 
-const handleOpenMatchModal = (title: string, id: string) => {
+  const handleOpenMatchModal = (title: string, id: string) => {
     setActiveJobTitle(title);
     setActiveJobId(id);
     setIsMatchModalOpen(true);
@@ -187,7 +187,7 @@ const handleOpenMatchModal = (title: string, id: string) => {
               type={job.type}
               department={job.department}
               salary={job.salary}
-             matchCount={job.matchCount || 0}
+              matchCount={job.matchCount || 0}
               onStatusChange={handleStatusChange}
               onFindMatches={handleOpenMatchModal}
             />
@@ -198,7 +198,7 @@ const handleOpenMatchModal = (title: string, id: string) => {
       <MatchCandidatesModal
         isOpen={isMatchModalOpen}
         onClose={() => setIsMatchModalOpen(false)}
-       jobTitle={activeJobTitle}
+        jobTitle={activeJobTitle}
         jobId={activeJobId}
       />
     </>

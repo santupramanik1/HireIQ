@@ -458,10 +458,7 @@ export const submitApplication = async (req: Request, res: Response) => {
     });
 
     if (evaluationResult.matchScore > 50) {
-      await Job.findByIdAndUpdate(
-        jobObjectId,
-        { $inc: { matchCount: 1 } }
-      );
+      await Job.findByIdAndUpdate(jobObjectId, { $inc: { matchCount: 1 } });
     }
 
     return res.status(201).json({

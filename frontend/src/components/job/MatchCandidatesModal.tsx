@@ -326,7 +326,7 @@ const AVATAR_COLORS = [
   'bg-blue-500',
   'bg-emerald-500',
   'bg-violet-500',
-  'bg-amber-500'
+  'bg-amber-500',
 ];
 
 export default function MatchCandidatesModal({
@@ -335,7 +335,6 @@ export default function MatchCandidatesModal({
   jobTitle,
   jobId,
 }: MatchCandidatesModalProps) {
-  
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -344,7 +343,7 @@ export default function MatchCandidatesModal({
   // FETCH DATA FROM BACKEND WHEN MODAL OPENS
   useEffect(() => {
     if (isOpen && jobId) {
-      const id=jobId
+      const id = jobId;
       const fetchMatchedCandidates = async () => {
         setIsLoading(true);
         try {
@@ -354,40 +353,46 @@ export default function MatchCandidatesModal({
           );
 
           // Map the backend data to our UI format
-          const formattedCandidates = data.data.candidates.map((backendData: any, index: number) => {
-            
-            // Generate initials (e.g. "Santu Pramanik" -> "SP")
-            const names = backendData.candidateName ? backendData.candidateName.split(' ') : ['U'];
-            const initials = names.length > 1 
-              ? `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase() 
-              : names[0].substring(0, 2).toUpperCase();
+          const formattedCandidates = data.data.candidates.map(
+            (backendData: any, index: number) => {
+              // Generate initials (e.g. "Santu Pramanik" -> "SP")
+              const names = backendData.candidateName
+                ? backendData.candidateName.split(' ')
+                : ['U'];
+              const initials =
+                names.length > 1
+                  ? `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase()
+                  : names[0].substring(0, 2).toUpperCase();
 
-            // Assign badge based on score and rank
-            let badge = `#${index + 1}`;
-            let badgeColor = 'bg-slate-100 text-slate-600';
-            
-            if (index === 0 && backendData.matchScore > 70) {
-              badge = 'Top Match';
-              badgeColor = 'bg-yellow-100 text-yellow-800';
-            } else if (backendData.matchScore >= 80) {
-              badge = 'Great Match';
-              badgeColor = 'bg-emerald-100 text-emerald-800';
+              // Assign badge based on score and rank
+              let badge = `#${index + 1}`;
+              let badgeColor = 'bg-slate-100 text-slate-600';
+
+              if (index === 0 && backendData.matchScore > 70) {
+                badge = 'Top Match';
+                badgeColor = 'bg-yellow-100 text-yellow-800';
+              } else if (backendData.matchScore >= 80) {
+                badge = 'Great Match';
+                badgeColor = 'bg-emerald-100 text-emerald-800';
+              }
+
+              return {
+                id: backendData.candidateEmail, // Use email as unique ID
+                name: backendData.candidateName || 'Unknown Applicant',
+                initials: initials,
+                avatarColor: AVATAR_COLORS[index % AVATAR_COLORS.length],
+                badge: badge,
+                badgeColor: badgeColor,
+                title: backendData.jobTitle || 'Applicant',
+                company: backendData.candidateEmail, // Display email below name
+                quote:
+                  backendData.summary ||
+                  'The AI is currently evaluating this candidate.',
+                skills: ['AI Evaluated'], // Since your backend route was restricted, we show a default tag
+                matchScore: backendData.matchScore || 0,
+              };
             }
-
-            return {
-              id: backendData.candidateEmail, // Use email as unique ID
-              name: backendData.candidateName || 'Unknown Applicant',
-              initials: initials,
-              avatarColor: AVATAR_COLORS[index % AVATAR_COLORS.length],
-              badge: badge,
-              badgeColor: badgeColor,
-              title: backendData.jobTitle || 'Applicant',
-              company: backendData.candidateEmail, // Display email below name
-              quote: backendData.summary || 'The AI is currently evaluating this candidate.',
-              skills: ['AI Evaluated'], // Since your backend route was restricted, we show a default tag
-              matchScore: backendData.matchScore || 0,
-            };
-          });
+          );
 
           setCandidates(formattedCandidates);
         } catch (error) {
@@ -421,16 +426,56 @@ export default function MatchCandidatesModal({
     );
   };
 
-  const handleSendInvites = (interviewType: string) => {
-    alert(`Successfully sent ${interviewType} invites to ${selectedIds.length} candidates!`);
-    setCurrentView('match');
+  const handleSendInvites = async (interviewType: string) => {
+    if (selectedIds.length === 0) return;
+
+    const toastId = toast.loading('Sending personalized invites...');
+
+    try {
+      // Loop through each selected ID (which is the candidate's email)
+      for (const email of selectedIds) {
+        // Find the full candidate object so we can get their actual name
+        const candidate = candidates.find((c) => c.id === email);
+        const candidateName = candidate ? candidate.name : 'Candidate';
+
+        // NOTE: Ensure your backend actually generates the real link for them later
+        const uniqueInterviewLink = `http://localhost:3000/interview/start?type=tech&candidateEmail=${email}&jobId=${jobId}`;
+        const emailSubject = `Interview Invitation: ${jobTitle}`;
+
+        // Send the individual email via your Express backend
+        await axios.post(
+          `${import.meta.env.VITE_API_BASE_URL}/emails/send`,
+          {
+            to: email,
+            subject: emailSubject,
+            candidateName: candidateName,
+            interviewType: interviewType,
+            jobTitle: jobTitle,
+            interviewLink: uniqueInterviewLink,
+          },
+          { withCredentials: true }
+        );
+      }
+
+      // Update UI on success
+      toast.success(
+        `Successfully sent ${selectedIds.length} personalized invites!`,
+        {
+          id: toastId,
+        }
+      );
+      setCurrentView('match');
+      setSelectedIds([]);
+    } catch (error) {
+      console.error('Failed to send emails:', error);
+      toast.error('Failed to send invites. Please try again.', { id: toastId });
+    }
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200 font-class">
       {currentView === 'match' ? (
         <div className="bg-slate-50 w-full max-w-2xl max-h-[95vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 relative">
-          
           {/* Header */}
           <header className="flex justify-between items-center bg-white border-b border-slate-200 px-5 sm:px-6 py-4 sm:py-5 shrink-0 z-20">
             <div className="min-w-0 pr-4">
@@ -445,21 +490,26 @@ export default function MatchCandidatesModal({
                 <span className="text-slate-800 font-bold">{jobTitle}</span>
               </p>
             </div>
-            <button onClick={onClose} className="p-2 rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer shrink-0">
+            <button
+              onClick={onClose}
+              className="p-2 rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer shrink-0"
+            >
               <span className="material-symbols-outlined">close</span>
             </button>
           </header>
 
           {/* Body */}
           <div className="overflow-y-auto flex-1 p-4 sm:p-6 flex flex-col gap-4 sm:gap-6 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
-            
             {/* Action Bar */}
             <div className="sticky top-0 z-10 flex flex-wrap justify-between items-center gap-3 bg-white/90 backdrop-blur-md p-3 sm:p-4 rounded-xl border border-slate-200 shadow-sm">
               <div className="flex items-center gap-3 sm:gap-4">
                 <label className="flex items-center gap-2 cursor-pointer group">
                   <input
                     type="checkbox"
-                    checked={selectedIds.length === candidates.length && candidates.length > 0}
+                    checked={
+                      selectedIds.length === candidates.length &&
+                      candidates.length > 0
+                    }
                     onChange={handleSelectAll}
                     disabled={isLoading || candidates.length === 0}
                     className="w-5 h-5 rounded border-slate-300 text-violet-600 focus:ring-violet-500 cursor-pointer transition-all disabled:opacity-50"
@@ -482,21 +532,34 @@ export default function MatchCandidatesModal({
                     : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                 }`}
               >
-                <span className="material-symbols-outlined text-[16px] sm:text-[18px]">mail</span>
-                <span>Send Invite <span className="hidden sm:inline">({selectedIds.length})</span></span>
+                <span className="material-symbols-outlined text-[16px] sm:text-[18px]">
+                  mail
+                </span>
+                <span>
+                  Send Invite{' '}
+                  <span className="hidden sm:inline">
+                    ({selectedIds.length})
+                  </span>
+                </span>
               </button>
             </div>
 
             {/* Candidates List / Loading State */}
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-12">
-                 <div className="w-10 h-10 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin mb-4"></div>
-                 <p className="text-slate-500 font-medium">Fetching best matches...</p>
+                <div className="w-10 h-10 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin mb-4"></div>
+                <p className="text-slate-500 font-medium">
+                  Fetching best matches...
+                </p>
               </div>
             ) : candidates.length === 0 ? (
               <div className="text-center py-10 bg-white rounded-xl border border-slate-200">
-                <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">person_off</span>
-                <p className="text-slate-500 font-medium">No candidates have applied for this job yet.</p>
+                <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">
+                  person_off
+                </span>
+                <p className="text-slate-500 font-medium">
+                  No candidates have applied for this job yet.
+                </p>
               </div>
             ) : (
               <div className="flex flex-col gap-3 sm:gap-4">
@@ -506,8 +569,8 @@ export default function MatchCandidatesModal({
                     <div
                       key={candidate.id}
                       className={`bg-white border rounded-xl sm:rounded-2xl p-4 sm:p-5 transition-all duration-200 flex gap-3 sm:gap-4 group ${
-                        isSelected 
-                          ? 'border-violet-400 ring-1 ring-violet-400 shadow-sm' 
+                        isSelected
+                          ? 'border-violet-400 ring-1 ring-violet-400 shadow-sm'
                           : 'border-slate-200 hover:border-violet-200 hover:shadow-md'
                       }`}
                     >
@@ -520,7 +583,12 @@ export default function MatchCandidatesModal({
                           className="w-5 h-5 rounded border-slate-300 text-violet-600 cursor-pointer"
                         />
                         <button className="text-slate-300 hover:text-amber-400 transition-colors cursor-pointer">
-                          <span className={`material-symbols-outlined text-[20px] sm:text-[22px] ${isSelected ? 'text-amber-400' : ''}`} style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                          <span
+                            className={`material-symbols-outlined text-[20px] sm:text-[22px] ${isSelected ? 'text-amber-400' : ''}`}
+                            style={{ fontVariationSettings: "'FILL' 1" }}
+                          >
+                            star
+                          </span>
                         </button>
                       </div>
 
@@ -528,7 +596,9 @@ export default function MatchCandidatesModal({
                         <div className="flex justify-between items-start gap-3">
                           <div className="flex items-start gap-3 sm:gap-4 min-w-0">
                             {/* Avatar */}
-                            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-lg shrink-0 shadow-sm ${candidate.avatarColor}`}>
+                            <div
+                              className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-lg shrink-0 shadow-sm ${candidate.avatarColor}`}
+                            >
                               {candidate.initials}
                             </div>
                             <div className="min-w-0 pt-0.5">
@@ -536,12 +606,16 @@ export default function MatchCandidatesModal({
                                 <h3 className="text-base sm:text-lg font-bold text-slate-900 truncate">
                                   {candidate.name}
                                 </h3>
-                                <span className={`px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold uppercase tracking-wide ${candidate.badgeColor}`}>
+                                <span
+                                  className={`px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold uppercase tracking-wide ${candidate.badgeColor}`}
+                                >
                                   {candidate.badge}
                                 </span>
                               </div>
                               <p className="text-xs sm:text-sm text-slate-500 font-medium truncate">
-                                {candidate.title} <span className="mx-1">·</span> {candidate.company}
+                                {candidate.title}{' '}
+                                <span className="mx-1">·</span>{' '}
+                                {candidate.company}
                               </p>
                             </div>
                           </div>
@@ -567,7 +641,10 @@ export default function MatchCandidatesModal({
                           </p>
                           <div className="flex flex-wrap gap-1.5 sm:gap-2">
                             {candidate.skills.map((skill, index) => (
-                              <span key={index} className="text-[11px] sm:text-xs text-slate-600 font-medium bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200/60 whitespace-nowrap">
+                              <span
+                                key={index}
+                                className="text-[11px] sm:text-xs text-slate-600 font-medium bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200/60 whitespace-nowrap"
+                              >
                                 {skill}
                               </span>
                             ))}

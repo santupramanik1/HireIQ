@@ -12,6 +12,7 @@ import applyRouter from './routes/public.routes.js';
 import { testCloudinaryConnection } from './config/cloudinary.js';
 import cors from 'cors';
 import candidateRouter from './routes/candidate.routes.js';
+import emailRouter from './routes/email.routes.js';
 // import { connectRedis } from "./config/redis.js";
 
 const app = express();
@@ -48,6 +49,9 @@ app.use('/api/jobs', jobRouter);
 
 // Get all candidate who are applied for Job
 app.use('/api/applications', candidateRouter);
+
+// Email sending
+app.use('/api/emails', emailRouter);
 
 // Database & Services connection
 await connDB();

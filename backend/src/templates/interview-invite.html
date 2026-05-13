@@ -1,0 +1,105 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interview Invitation</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f5;
+      font-family: Arial, Helvetica, sans-serif;
+    "
+  >
+    <div style="background-color: #f4f4f5; padding: 40px 20px">
+      <div
+        style="
+          max-width: 600px;
+          margin: 0 auto;
+          background-color: #ffffff;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+          border: 1px solid #e4e4e7;
+        "
+      >
+        <!-- Header with Gradient -->
+        <div
+          style="
+            background: #6366f1;
+            background: linear-gradient(90deg, #6b8df8 0%, #8b5cf6 100%);
+            padding: 24px 30px;
+          "
+        >
+          <h2
+            style="
+              color: #ffffff;
+              margin: 0;
+              font-size: 24px;
+              font-weight: bold;
+            "
+          >
+            Interview Invitation
+          </h2>
+        </div>
+
+        <!-- Body Content -->
+        <div
+          style="
+            padding: 30px;
+            color: #3f3f46;
+            font-size: 16px;
+            line-height: 1.6;
+          "
+        >
+          <p style="margin-top: 0">Dear <strong>{{CANDIDATE_NAME}}</strong>,</p>
+
+          <p>
+            Thank you for your interest in joining our team. We were impressed
+            with your background and would like to invite you for a
+            <strong>{{INTERVIEW_TYPE}}</strong>.
+          </p>
+
+          <p><strong>Position:</strong> {{JOB_TITLE}}</p>
+
+          <p>
+            Please click the button below to start your AI-powered interview:
+          </p>
+
+          <!-- Call to Action Button -->
+          <div style="text-align: center; margin: 35px 0">
+            <a
+              href="{{INTERVIEW_LINK}}"
+              style="
+                display: inline-block;
+                background: #6366f1;
+                background: linear-gradient(90deg, #6b8df8 0%, #8b5cf6 100%);
+                color: #ffffff;
+                font-weight: bold;
+                text-decoration: none;
+                padding: 14px 32px;
+                border-radius: 6px;
+                font-size: 16px;
+              "
+            >
+              Start Interview
+            </a>
+          </div>
+
+          <!-- Fallback Link -->
+          <p style="margin-bottom: 0; font-size: 14px; color: #71717a">
+            If the button doesn't work, copy and paste this link into your
+            browser:<br />
+            <a
+              href="{{INTERVIEW_LINK}}"
+              style="color: #6366f1; word-break: break-all"
+              >{{INTERVIEW_LINK}}</a
+            >
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
