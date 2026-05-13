@@ -28,12 +28,13 @@ export default function JobsPage() {
 
   const [isMatchModalOpen, setIsMatchModalOpen] = useState(false);
   const [activeJobTitle, setActiveJobTitle] = useState('');
+  const [activeJobId, setActiveJobId] = useState('');
 
-  const handleOpenMatchModal = (title: string) => {
+const handleOpenMatchModal = (title: string, id: string) => {
     setActiveJobTitle(title);
+    setActiveJobId(id);
     setIsMatchModalOpen(true);
   };
-
   // Grab the trigger from the parent Layout
   const { refreshTrigger } = useOutletContext<DashboardContext>();
 
@@ -197,7 +198,8 @@ export default function JobsPage() {
       <MatchCandidatesModal
         isOpen={isMatchModalOpen}
         onClose={() => setIsMatchModalOpen(false)}
-        jobTitle={activeJobTitle}
+       jobTitle={activeJobTitle}
+        jobId={activeJobId}
       />
     </>
   );

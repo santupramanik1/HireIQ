@@ -16,7 +16,7 @@ export interface JobCardProps {
   matchCount?: number;
   // This prop allows the card to talk to the parent page
   onStatusChange: (jobId: string, newStatus: string) => void;
-  onFindMatches?: (jobTitle: string) => void;
+  onFindMatches?: (jobTitle: string, jobId: string) => void;
 }
 
 export function JobCard({
@@ -180,7 +180,7 @@ export function JobCard({
         </div>
 
         <button
-          onClick={() => onFindMatches && onFindMatches(title)}
+          onClick={() => onFindMatches && _id &&  onFindMatches(title,_id)}
           className="bg-linear-to-r from-violet-600 to-blue-600 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all shadow-sm cursor-pointer"
         >
           <span className="material-symbols-outlined text-[18px]">
