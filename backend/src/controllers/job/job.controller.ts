@@ -457,6 +457,13 @@ export const submitApplication = async (req: Request, res: Response) => {
       areasToImprove: evaluationResult.areasToImprove,
     });
 
+    if (evaluationResult.matchScore > 50) {
+      await Job.findByIdAndUpdate(
+        jobObjectId,
+        { $inc: { matchCount: 1 } }
+      );
+    }
+
     return res.status(201).json({
       success: true,
       message:

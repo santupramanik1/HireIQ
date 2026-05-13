@@ -58,6 +58,10 @@ const jobSchema = new Schema<IJob>(
         message: 'You must add at least one skill before publishing this job.',
       },
     },
+    matchCount: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

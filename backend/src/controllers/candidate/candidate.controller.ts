@@ -148,28 +148,31 @@ export const candidateInfoById = async (
   }
 };
 
-
 /**
  * @desc    Get top matched candidates for a specific job based on AI analysis score
  * @route   GET /api/applications/matched-candidates/:jobId
  * @access  Private/Admin
  */
 
-
-export const getTopMatchedCandidates = async (req:Request<{ id: string }>, res: Response) => {
+export const getTopMatchedCandidates = async (
+  req: Request<{ id: string }>,
+  res: Response
+) => {
   try {
     const { id } = req.params;
 
     //  Validate Job ID
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ success: false, message: 'Invalid Job ID format' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Invalid Job ID format' });
     }
 
     // Aggregation Pipeline
     const pipeline: any[] = [
       // Match applications strictly for this job
-      { 
-        $match: { jobID: new mongoose.Types.ObjectId(id) } 
+      {
+        $match: { jobID: new mongoose.Types.ObjectId(id) },
       },
 
       // Join Job Details (Needed to fetch the Job Title)
@@ -178,42 +181,45 @@ export const getTopMatchedCandidates = async (req:Request<{ id: string }>, res: 
           from: 'jobs', // Ensure this matches your jobs collection name
           localField: 'jobID',
           foreignField: '_id',
-          as: 'jobDetails'
-        }
+          as: 'jobDetails',
+        },
       },
-      { 
-        $unwind: { path: '$jobDetails', preserveNullAndEmptyArrays: true } 
+      {
+        $unwind: { path: '$jobDetails', preserveNullAndEmptyArrays: true },
       },
-      
+
       // Join Candidate Details
       {
         $lookup: {
-          from: 'candidates', 
+          from: 'candidates',
           localField: 'candidateID',
           foreignField: '_id',
-          as: 'candidateDetails'
-        }
+          as: 'candidateDetails',
+        },
       },
-      { 
-        $unwind: { path: '$candidateDetails', preserveNullAndEmptyArrays: true } 
+      {
+        $unwind: {
+          path: '$candidateDetails',
+          preserveNullAndEmptyArrays: true,
+        },
       },
 
       // Join AI Match Analysis
       {
         $lookup: {
-          from: 'resumeanalyses', 
-          localField: '_id', 
+          from: 'resumeanalyses',
+          localField: '_id',
           foreignField: 'applicationId',
-          as: 'analysis'
-        }
+          as: 'analysis',
+        },
       },
-      { 
-        $unwind: { path: '$analysis', preserveNullAndEmptyArrays: true } 
+      {
+        $unwind: { path: '$analysis', preserveNullAndEmptyArrays: true },
       },
 
       // Sort by the AI Match Score in Descending Order (Highest first)
-      { 
-        $sort: { 'analysis.matchScore': -1, createdAt: -1 } 
+      {
+        $sort: { 'analysis.matchScore': -1, createdAt: -1 },
       },
 
       // Project ONLY the specifically requested fields
@@ -223,10 +229,10 @@ export const getTopMatchedCandidates = async (req:Request<{ id: string }>, res: 
           jobTitle: '$jobDetails.title',
           candidateName: '$candidateDetails.name',
           candidateEmail: '$candidateDetails.email',
-          matchScore: { $ifNull: ['$analysis.matchScore', 0] }, 
-          summary: '$analysis.summary'
-        }
-      }
+          matchScore: { $ifNull: ['$analysis.matchScore', 0] },
+          summary: '$analysis.summary',
+        },
+      },
     ];
 
     // Execute the pipeline
@@ -237,16 +243,15 @@ export const getTopMatchedCandidates = async (req:Request<{ id: string }>, res: 
       message: 'Matched candidates fetched successfully',
       data: {
         total: matchedCandidates.length,
-        candidates: matchedCandidates
-      }
+        candidates: matchedCandidates,
+      },
     });
-
   } catch (error: any) {
     console.error('Error fetching matched candidates:', error);
     return res.status(500).json({
       success: false,
       message: 'Failed to fetch matched candidates',
-      error: error.message
+      error: error.message,
     });
   }
 };

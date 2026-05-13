@@ -17,10 +17,10 @@ import candidateRouter from './routes/candidate.routes.js';
 const app = express();
 
 // Add this simple Health Check route
-app.get('/', (req: Request , res: Response) => {
+app.get('/', (req: Request, res: Response) => {
   res.status(200).json({
     success: true,
-    message: 'Welcome to the HireIQ API! The server is running smoothly.'
+    message: 'Welcome to the HireIQ API! The server is running smoothly.',
   });
 });
 
@@ -47,7 +47,7 @@ app.use('/api/jobs', applyRouter);
 app.use('/api/jobs', jobRouter);
 
 // Get all candidate who are applied for Job
-app.use('/api/applications',candidateRouter)
+app.use('/api/applications', candidateRouter);
 
 // Database & Services connection
 await connDB();

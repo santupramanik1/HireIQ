@@ -16,6 +16,7 @@ export interface IJob extends Document {
   responsibilities?: string[];
   requirements?: string[];
   skills?: string[];
+  matchCount: number;
   createdAt: Date;
   updatedAt: Date;
 }
