@@ -3,6 +3,7 @@ import { JobCard } from '../components/job/JobCard';
 import { useOutletContext } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import MatchCandidatesModal from '../components/job/MatchCandidatesModal';
 
 // ==========================================
 // TYPES & INTERFACES
@@ -24,6 +25,14 @@ export default function JobsPage() {
   const [jobList, setJobList] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [totalJobs, setTotalJobs] = useState<number>(0);
+
+  const [isMatchModalOpen, setIsMatchModalOpen] = useState(false);
+  const [activeJobTitle, setActiveJobTitle] = useState('');
+
+  const handleOpenMatchModal = (title: string) => {
+    setActiveJobTitle(title);
+    setIsMatchModalOpen(true);
+  };
 
   // Grab the trigger from the parent Layout
   const { refreshTrigger } = useOutletContext<DashboardContext>();
@@ -179,10 +188,17 @@ export default function JobsPage() {
               salary={job.salary}
               matchCount={0}
               onStatusChange={handleStatusChange}
+              onFindMatches={handleOpenMatchModal}
             />
           ))}
         </section>
       )}
+
+      <MatchCandidatesModal
+        isOpen={isMatchModalOpen}
+        onClose={() => setIsMatchModalOpen(false)}
+        jobTitle={activeJobTitle}
+      />
     </>
   );
 }
