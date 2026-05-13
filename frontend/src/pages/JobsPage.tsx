@@ -186,7 +186,7 @@ export default function JobsPage() {
               type={job.type}
               department={job.department}
               salary={job.salary}
-              matchCount={0}
+             matchCount={job.matchCount || 0}
               onStatusChange={handleStatusChange}
               onFindMatches={handleOpenMatchModal}
             />
