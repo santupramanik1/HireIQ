@@ -147,3 +147,106 @@ export const candidateInfoById = async (
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+
+/**
+ * @desc    Get top matched candidates for a specific job based on AI analysis score
+ * @route   GET /api/applications/matched-candidates/:jobId
+ * @access  Private/Admin
+ */
+
+
+export const getTopMatchedCandidates = async (req:Request<{ id: string }>, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    //  Validate Job ID
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid Job ID format' });
+    }
+
+    // Aggregation Pipeline
+    const pipeline: any[] = [
+      // Match applications strictly for this job
+      { 
+        $match: { jobID: new mongoose.Types.ObjectId(id) } 
+      },
+
+      // Join Job Details (Needed to fetch the Job Title)
+      {
+        $lookup: {
+          from: 'jobs', // Ensure this matches your jobs collection name
+          localField: 'jobID',
+          foreignField: '_id',
+          as: 'jobDetails'
+        }
+      },
+      { 
+        $unwind: { path: '$jobDetails', preserveNullAndEmptyArrays: true } 
+      },
+      
+      // Join Candidate Details
+      {
+        $lookup: {
+          from: 'candidates', 
+          localField: 'candidateID',
+          foreignField: '_id',
+          as: 'candidateDetails'
+        }
+      },
+      { 
+        $unwind: { path: '$candidateDetails', preserveNullAndEmptyArrays: true } 
+      },
+
+      // Join AI Match Analysis
+      {
+        $lookup: {
+          from: 'resumeanalyses', 
+          localField: '_id', 
+          foreignField: 'applicationId',
+          as: 'analysis'
+        }
+      },
+      { 
+        $unwind: { path: '$analysis', preserveNullAndEmptyArrays: true } 
+      },
+
+      // Sort by the AI Match Score in Descending Order (Highest first)
+      { 
+        $sort: { 'analysis.matchScore': -1, createdAt: -1 } 
+      },
+
+      // Project ONLY the specifically requested fields
+      {
+        $project: {
+          _id: 0, // Hides the default MongoDB ObjectId
+          jobTitle: '$jobDetails.title',
+          candidateName: '$candidateDetails.name',
+          candidateEmail: '$candidateDetails.email',
+          matchScore: { $ifNull: ['$analysis.matchScore', 0] }, 
+          summary: '$analysis.summary'
+        }
+      }
+    ];
+
+    // Execute the pipeline
+    const matchedCandidates = await Application.aggregate(pipeline);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Matched candidates fetched successfully',
+      data: {
+        total: matchedCandidates.length,
+        candidates: matchedCandidates
+      }
+    });
+
+  } catch (error: any) {
+    console.error('Error fetching matched candidates:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to fetch matched candidates',
+      error: error.message
+    });
+  }
+};
