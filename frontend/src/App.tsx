@@ -10,6 +10,7 @@ import JobsPage from './pages/JobsPage';
 import ApplyJobPage from './pages/ApplyJobPage';
 import CandidateTable from './pages/CandidatesPage';
 import CandidateInfo from './pages/CandidateInfoPage';
+import SchedulesPage from './pages/SchedulesPage';
 
 export const App = () => {
   return (
@@ -46,9 +47,7 @@ export const App = () => {
             <Route
               path="schedules"
               element={
-                <div className="p-8 text-2xl font-bold">
-                  Schedules Page Coming Soon!
-                </div>
+               <SchedulesPage></SchedulesPage>
               }
             />
             <Route
