@@ -1,49 +1,126 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
 
 export default function StartInterviewPage() {
   const navigate = useNavigate();
+  const { interviewId } = useParams(); // Get the ID from the URL
 
-  // These would normally come from your database or URL params
-  const [candidateName, setCandidateName] = useState('Santu Pramanik');
-  const [candidateEmail, setCandidateEmail] = useState('santu700141@gmail.com');
-  const jobTitle = 'Senior Backend Developer';
-  const company = 'HireIQ';
+  // State for fetching data
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Dynamic states
+  const [candidateName, setCandidateName] = useState('');
+  const [candidateEmail, setCandidateEmail] = useState('');
+  const [jobTitle, setJobTitle] = useState('');
+  const company = 'HireIQ'; // Update this if company comes from backend
+
+  useEffect(() => {
+    const fetchInterviewDetails = async () => {
+      try {
+        const id = interviewId;
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/interviews/${id}`
+        );
+
+        const { data } = response.data;
+
+        // Populate the state with backend data
+        // Assuming your backend populates candidateId and jobId
+        setCandidateName(data.candidateId?.name || 'Unknown Candidate');
+        setCandidateEmail(data.candidateId?.email || 'No email provided');
+        setJobTitle(data.jobId?.title || 'Applicant');
+      } catch (err: any) {
+        console.error('Failed to fetch interview details', err);
+        setError(
+          err.response?.data?.message || 'Failed to load interview details.'
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (interviewId) {
+      fetchInterviewDetails();
+    }
+  }, [interviewId]);
 
   const handleStart = (e: React.FormEvent) => {
     e.preventDefault();
-    // Navigate to the actual active interview room/component
-    // navigate(`/interview/room/${interviewId}`);
-    console.log('Starting interview for:', candidateName);
+    navigate(`/interview/room/${interviewId}`);
   };
 
+  // ==========================================
+  // LOADING STATE
+  // ==========================================
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0B0F19] flex justify-center items-center">
+        <div className="flex flex-col items-center gap-4">
+          <span className="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin"></span>
+          <p className="text-slate-400 font-medium">Loading your session...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // ERROR STATE
+  // ==========================================
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#0B0F19] flex justify-center items-center p-4">
+        <div className="max-w-md w-full bg-[#131722] border border-red-500/20 rounded-2xl p-8 text-center">
+          <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg
+              className="w-8 h-8 text-red-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold text-white mb-2">
+            Session Not Found
+          </h2>
+          <p className="text-slate-400 mb-6">{error}</p>
+          <button
+            onClick={() => navigate('/')}
+            className="px-6 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition"
+          >
+            Return Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // MAIN UI (Loaded)
+  // ==========================================
   return (
     // Main Wrapper - Dark Theme Background
     <div className="min-h-screen bg-[#0B0F19] text-slate-300  p-4 md:p-8 selection:bg-indigo-500/30 font-class">
       <div className="max-w-6xl mx-auto">
         {/* --- Top Navigation Bar --- */}
-        <div className="flex items-center justify-between mb-10">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-600/20">
-              <svg
-                className="w-5 h-5 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
-                />
-              </svg>
-            </div>
-            <span className="text-xl font-bold text-white tracking-wide">
-              {company}
-            </span>
+        <div className="flex items-center justify-between mb-10 h-10">
+          {/* --- Left Side: Logo Only --- */}
+          <div className="flex items-center justify-center srounded-lg overflow-hidden  p-1">
+            <img
+              src="/hireiq-logo.png"
+              alt="HireIQ Logo"
+              className="w-30 h-30 object-contain"
+            />
           </div>
 
+          {/* --- Right Side: Status Badge --- */}
           <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800/50 border border-slate-700/50 rounded-full">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <span className="text-xs font-medium text-slate-300">
@@ -262,6 +339,7 @@ export default function StartInterviewPage() {
               </h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Icons truncated for brevity but remain identical to your original code */}
                 <div className="flex items-center gap-3 p-3 bg-slate-800/30 border border-slate-800 rounded-xl">
                   <svg
                     className="w-5 h-5 text-slate-400"
@@ -396,7 +474,7 @@ export default function StartInterviewPage() {
 
                 <button
                   type="submit"
-                  className="w-full mt-4 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl px-4 py-3.5 transition-all duration-200 transform hover:-translate-y-0.5 shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2"
+                  className="w-full mt-4 cursor-pointer bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl px-4 py-3.5 transition-all duration-200 transform hover:-translate-y-0.5 shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2"
                 >
                   Start Interview
                   <svg

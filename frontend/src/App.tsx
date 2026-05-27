@@ -62,9 +62,16 @@ export const App = () => {
 
         <Route path="/interview/verify" element={<VerifyInterviewLink />} />
 
-        <Route path="/start-interview" element={<StartInterviewPage />} />
+        {/* <Route path="/start-interview" element={<StartInterviewPage />} /> */}
+        <Route
+          path="/start-interview/:interviewId"
+          element={<StartInterviewPage />}
+        />
         <Route path="/complete-interview" element={<InterviewCompletePage />} />
-        <Route path="/interview" element={<ActiveInterviewRoom />} />
+        <Route
+          path="/interview/room/:interviewId"
+          element={<ActiveInterviewRoom />}
+        />
       </Routes>
     </>
   );

@@ -1,6 +1,7 @@
 import express from 'express';
 import { isAuthenticated } from '../middlewares/auth.middleware.js';
 import {
+  getInterviewById,
   getPendingInvites,
   inviteCandidateToInterview,
   verifyMagicLink,
@@ -11,5 +12,6 @@ const interviewRouter = express.Router();
 interviewRouter.post('/invite', isAuthenticated, inviteCandidateToInterview);
 interviewRouter.get('/pending/:jobId', isAuthenticated, getPendingInvites);
 interviewRouter.get('/verify-magic-link', verifyMagicLink);
+interviewRouter.get("/:id", getInterviewById);
 
 export default interviewRouter;
