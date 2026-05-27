@@ -19,7 +19,7 @@ export default function SendInviteModal({
   const [interviewType, setInterviewType] = useState('Technical Interview');
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl w-full max-w-[500px] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+    <div className="bg-white rounded-2xl shadow-xl w-full max-w-125 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
       <div className="flex items-center justify-between px-6 pt-6 pb-4">
         <div className="flex items-center gap-3">
           <button

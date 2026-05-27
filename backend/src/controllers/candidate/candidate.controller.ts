@@ -226,6 +226,8 @@ export const getTopMatchedCandidates = async (
       {
         $project: {
           _id: 0, // Hides the default MongoDB ObjectId
+          applicationId: '$_id', // ADD THIS
+          candidateId: '$candidateDetails._id',
           jobTitle: '$jobDetails.title',
           candidateName: '$candidateDetails.name',
           candidateEmail: '$candidateDetails.email',

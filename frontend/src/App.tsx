@@ -44,12 +44,7 @@ export const App = () => {
             {/* Placeholders for your future pages */}
             <Route path="candidates" element={<CandidateTable />} />
             <Route path="candidate-info/:id" element={<CandidateInfo />} />
-            <Route
-              path="schedules"
-              element={
-               <SchedulesPage></SchedulesPage>
-              }
-            />
+            <Route path="schedules" element={<SchedulesPage></SchedulesPage>} />
             <Route
               path="settings"
               element={

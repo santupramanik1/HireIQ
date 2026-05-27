@@ -12,8 +12,8 @@ import applyRouter from './routes/public.routes.js';
 import { testCloudinaryConnection } from './config/cloudinary.js';
 import cors from 'cors';
 import candidateRouter from './routes/candidate.routes.js';
-import emailRouter from './routes/email.routes.js';
-// import { connectRedis } from "./config/redis.js";
+import interviewRouter from './routes/interview.routes.js';
+import { connectRedis } from './config/redis.js';
 
 const app = express();
 
@@ -50,13 +50,13 @@ app.use('/api/jobs', jobRouter);
 // Get all candidate who are applied for Job
 app.use('/api/applications', candidateRouter);
 
-// Email sending
-app.use('/api/emails', emailRouter);
+// Interview Inivitation
+app.use('/api/interviews', interviewRouter);
 
 // Database & Services connection
 await connDB();
 await testCloudinaryConnection();
-// await connectRedis()
+await connectRedis();
 
 // Global Error Handling Middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
