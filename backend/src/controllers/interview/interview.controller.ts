@@ -40,7 +40,7 @@ export const inviteCandidateToInterview = async (
       `interview_token:${token}`,
       newInterview._id.toString(),
       {
-        EX: 120,
+        EX: 86400,
       }
     );
 
@@ -188,6 +188,58 @@ export const getPendingInvites = async (req: Request, res: Response) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to fetch pending invites',
+    });
+  }
+};
+
+/**
+ * @desc    Get interview details by ID (with candidate and job info)
+ * @route   GET /api/interviews/:id
+ * @access  Public (Candidate accessing via Magic Link) or Private (Recruiter)
+ */
+export const getInterviewById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Validate the ID format to prevent database crash errors
+    if (!mongoose.Types.ObjectId.isValid(id as string )) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid Interview ID format' 
+      });
+    }
+
+    // Fetch the interview and populate the related references
+    const interview = await Interview.findById(id)
+      .populate({
+        path: 'candidateId',
+        select: 'name email', // Only pull the fields we need
+      })
+      .populate({
+        path: 'jobId',
+        select: 'title', // Pull the job title
+      });
+
+    // Check if it exists
+    if (!interview) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Interview session not found' 
+      });
+    }
+
+    // 4. Return the populated data
+    return res.status(200).json({
+      success: true,
+      data: interview
+    });
+
+  } catch (error: any) {
+    console.error('Error fetching interview by ID:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to fetch interview details',
+      error: error.message
     });
   }
 };

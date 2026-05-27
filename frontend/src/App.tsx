@@ -14,6 +14,7 @@ import SchedulesPage from './pages/SchedulesPage';
 import StartInterviewPage from './interview/pages/StartInterviewPage';
 import InterviewCompletePage from './interview/pages/InterviewCompletePage';
 import ActiveInterviewRoom from './interview/components/ActiveInterviewRoom';
+import VerifyInterviewLink from './interview/components/VerifyInterviewLink';
 
 export const App = () => {
   return (
@@ -58,6 +59,8 @@ export const App = () => {
             />
           </Route>
         </Route>
+
+        <Route path="/interview/verify" element={<VerifyInterviewLink />} />
 
         <Route path="/start-interview" element={<StartInterviewPage />} />
         <Route path="/complete-interview" element={<InterviewCompletePage />} />

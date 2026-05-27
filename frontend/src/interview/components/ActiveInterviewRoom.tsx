@@ -750,8 +750,6 @@ export default function ActiveInterviewRoom() {
   );
 }
 
-
-
 // import { useState, useEffect, useRef } from 'react';
 // import VapiModule from '@vapi-ai/web';
 
@@ -761,7 +759,7 @@ export default function ActiveInterviewRoom() {
 // export default function ActiveInterviewRoom() {
 //   const [isListening, setIsListening] = useState(false);
 //   const [transcript, setTranscript] = useState<{role: string, text: string}[]>([]);
-  
+
 //   // 1. Setup local Browser Speech Recognition
 //   const recognitionRef = useRef<any>(null);
 
@@ -803,7 +801,7 @@ export default function ActiveInterviewRoom() {
 //     } else {
 //       setIsListening(true);
 //       // 4. Ensure Vapi mic is MUTED to avoid fan noise interference
-//       vapi.setMuted(true); 
+//       vapi.setMuted(true);
 //       recognitionRef.current?.start();
 //     }
 //   };
@@ -826,7 +824,7 @@ export default function ActiveInterviewRoom() {
 //       });
 
 //       // 2. IMPORTANT: Mute the Vapi mic immediately so it doesn't try to use the fan noise
-//       vapi.setMuted(true); 
+//       vapi.setMuted(true);
 //       console.log("Vapi started and muted. Using local browser speech recognition.");
 
 //     } catch (err) {
@@ -835,7 +833,7 @@ export default function ActiveInterviewRoom() {
 //   };
 //   return (
 //     <div className="flex flex-col items-center p-10 bg-[#0B0F19] h-screen text-white">
-//       <button 
+//       <button
 //         onClick={startInterview}
 //         className="px-6 py-2 bg-indigo-600 rounded mb-5"
 //       >
