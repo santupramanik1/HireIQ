@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from beanie import PydanticObjectId
 
 from schema.interview_question_generation_schema import InterviewSetupCreate,InterviewSetupSave
-from services.interview_generation_services import create_interview_setup,save_interview_setup_to_db
+from services.interview_generation_services import create_interview_setup,save_interview_setup_to_db,get_candidate_interview_by_id
 from utils.auth_dependency import require_auth
 
 router = APIRouter()
@@ -77,4 +77,30 @@ async def handle_save_interview(request: Request, payload: InterviewSetupSave):
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"success": False, "message": f"Failed to save setup: {str(e)}"}
+        )
+    
+# /api/interview/candidate/6a24ff70306161e84cadda69
+@router.get("/candidate/{setup_id}")
+async def fetch_candidate_interview(setup_id: PydanticObjectId):
+    try:
+        candidate_data = await get_candidate_interview_by_id(setup_id)
+        
+        if not candidate_data:
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={
+                    "success": False, 
+                    "message": "Invalid or expired interview link."
+                }
+            )
+            
+        return {
+            "success": True, 
+            "data": candidate_data
+        }
+        
+    except Exception as e:
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"success": False, "message": "Failed to load interview."}
         )

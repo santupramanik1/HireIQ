@@ -221,3 +221,21 @@ async def save_interview_setup_to_db(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to save interview setup: {repr(e)}"
         )
+    
+
+# Get interview question from DB
+async def get_candidate_interview_by_id(setup_id: PydanticObjectId) -> dict:
+    try:
+        setup = await InterviewSetup.get(setup_id)
+        
+        if not setup:
+            return None
+        return {
+            "duration": setup.duration,
+            "questions": setup.questions
+        }
+
+    except Exception as e:
+       print("=== FETCH CANDIDATE INTERVIEW CRASH ===")
+       traceback.print_exc() 
+       raise e
