@@ -1,85 +1,3 @@
-# from fastapi import HTTPException, status
-# from langchain_core.prompts import ChatPromptTemplate
-# from beanie import PydanticObjectId
-# import traceback
-
-# from config.llm_config import get_llm
-# from schema.interview_question_generation_schema import GeneratedQuestions
-# from models.interview_model import InterviewSetup
-
-# async def create_interview_setup(
-#     job_id: PydanticObjectId, 
-#     duration: int, 
-#     custom_context: str, 
-#     created_by: PydanticObjectId
-# ) -> dict:
-    
-#     try:
-#         llm = get_llm()
-#         structured_llm = llm.with_structured_output(GeneratedQuestions)
-
-#         # Estimate question count based on duration 
-#         estimated_questions = duration // 2
-
-#         prompt = ChatPromptTemplate([
-#             ("system", """You are an elite AI Technical Interviewer for the HireIQ platform. 
-#             Your objective is to generate highly relevant interview questions based on the provided Job Description (JD).
-            
-#             RULES:
-#             1. Generate exactly {estimated_questions} questions.
-#             2. Provide a balanced mix of technical deep-dives and behavioral questions.
-#             3. Write each question as a clean, single-line string.
-#             4. DO NOT use line breaks, newline characters (\n), or tab characters (\t) inside the questions.
-#             5. Do not number the questions (e.g., avoid "1. ", "2. ").
-            
-#             EXPECTED JSON FORMAT:
-#             {{
-#                 "questions": [
-#                     "First generated question here?",
-#                     "Second generated question here?"
-#                 ]
-#             }}
-#             """),
-#             ("human", """
-#             === JOB DESCRIPTION / CONTEXT ===
-#             {context}
-#             """)
-#         ])
-
-       
-#         generation_chain = prompt | structured_llm
-#         ai_result = await generation_chain.ainvoke({
-#             "estimated_questions": estimated_questions,
-#             "context": custom_context
-#         })
-
-#         if not ai_result.questions:
-#              raise Exception("The AI returned an empty list of questions.")
-
-#         #  Save to Database 
-#         new_setup = InterviewSetup(
-#             job_id=job_id,
-#             duration=duration,
-#             custom_context=custom_context,
-#             questions=ai_result.questions,
-#             created_by=created_by
-#         )
-        
-#         await new_setup.save()
-
-#         #Return the saved document data
-#         return new_setup.model_dump()
-
-#     except Exception as e:
-#        print("=== INTERVIEW GENERATION CRASH REPORT ===")
-#        traceback.print_exc() 
-#        print("=========================================")
-        
-#        raise HTTPException(
-#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             detail=f"Failed to setup interview: {repr(e)}"
-#         )
-
 import json
 import traceback
 from fastapi import HTTPException, status
@@ -90,6 +8,8 @@ from beanie import PydanticObjectId
 from config.llm_config import get_llm
 from schema.interview_question_generation_schema import GeneratedQuestions
 from models.interview_model import InterviewSetup
+from models.session_model import InterviewSession
+from models.candidate_model import Candidate
 
 async def create_interview_setup(
     job_id: PydanticObjectId, 
@@ -223,19 +143,49 @@ async def save_interview_setup_to_db(
         )
     
 
-# Get interview question from DB
-async def get_candidate_interview_by_id(setup_id: PydanticObjectId) -> dict:
+
+    
+async def get_secure_session_data(session_id: PydanticObjectId) -> dict:
     try:
-        setup = await InterviewSetup.get(setup_id)
+        # 1. Fetch the unique session
+        session = await InterviewSession.get(session_id)
         
+        # 2. Security Checks
+        if not session:
+            raise Exception("Session not found.")
+        if session.is_completed:
+            raise Exception("This interview link has already been used and is expired.")
+
+        # 3. Fetch the AI Questions mapped to this Job
+        setup = await InterviewSetup.find_one(InterviewSetup.job_id == session.job_id)
         if not setup:
-            return None
+            raise Exception("Interview questions have not been generated for this role yet.")
+        
+        candidate = await Candidate.get(session.candidate_id)
+        if not candidate:
+            raise Exception("Candidate profile no longer exists in the system.")
+
+        # 4. Return everything the React UI needs!
         return {
+            "session_id": str(session.id),
+            "job_title": session.job_title,
+            "custom_context": setup.custom_context,
+            "candidate_name": candidate.name,  
+            "candidate_email": candidate.email,
             "duration": setup.duration,
             "questions": setup.questions
         }
 
     except Exception as e:
-       print("=== FETCH CANDIDATE INTERVIEW CRASH ===")
-       traceback.print_exc() 
        raise e
+
+async def mark_session_completed(session_id: PydanticObjectId) -> bool:
+    try:
+        session = await InterviewSession.get(session_id)
+        if session:
+            session.is_completed = True
+            await session.save()
+            return True
+        return False
+    except Exception as e:
+        raise e

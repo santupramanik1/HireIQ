@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from beanie import PydanticObjectId
 
 from schema.interview_question_generation_schema import InterviewSetupCreate,InterviewSetupSave
-from services.interview_generation_services import create_interview_setup,save_interview_setup_to_db,get_candidate_interview_by_id
+from services.interview_generation_services import create_interview_setup,save_interview_setup_to_db,get_secure_session_data, mark_session_completed
 from utils.auth_dependency import require_auth
 
 router = APIRouter()
@@ -103,4 +103,38 @@ async def fetch_candidate_interview(setup_id: PydanticObjectId):
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"success": False, "message": "Failed to load interview."}
+        )
+    
+# ==========================================
+# SECURE CANDIDATE ENDPOINTS
+# ==========================================
+@router.get("/session/{session_id}")
+async def fetch_secure_interview(session_id: str): # <--- CHANGE THIS TO str
+    try:
+        # Manually convert the string to an ObjectId
+        obj_id = PydanticObjectId(session_id)
+        
+        data = await get_secure_session_data(obj_id)
+        return {"success": True, "data": data}
+        
+    except Exception as e:
+        # Now, if it fails, we will see EXACTLY why in Postman and the terminal
+        print(f"=== CRASH IN SESSION ROUTE ===")
+        print(f"Failed ID: {session_id}")
+        print(f"Error: {str(e)}")
+        
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"success": False, "message": str(e)}
+        )
+    
+@router.post("/session/{session_id}/complete")
+async def complete_secure_interview(session_id: PydanticObjectId):
+    try:
+        await mark_session_completed(session_id)
+        return {"success": True, "message": "Interview locked and completed."}
+    except Exception as e:
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"success": False, "message": "Failed to close session."}
         )

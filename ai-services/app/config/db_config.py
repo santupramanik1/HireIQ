@@ -37,7 +37,9 @@ from beanie import init_beanie
 
 # 1. IMPORT YOUR MODEL HERE
 # (Adjust the path if your InterviewSetup is in a different folder)
-from models.interview_model import InterviewSetup 
+from models.interview_model import InterviewSetup
+from models.session_model import InterviewSession
+from models.candidate_model import Candidate
 
 load_dotenv()
 
@@ -64,7 +66,9 @@ async def connect_to_mongodb():
         await init_beanie(
             database=db_instance.db,
             document_models=[
-                InterviewSetup,  # <--- This connects your schema to MongoDB
+                InterviewSetup,  
+                InterviewSession,
+                Candidate
             ]
         )
 
