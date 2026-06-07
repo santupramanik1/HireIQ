@@ -10,6 +10,20 @@ export interface IInterview extends Document {
   invitedAt: Date;
   completedAt?: Date;
   overallScore?: number;
+  technicalScore?: number;
+  communicationScore?: number;
+  confidenceScore?: number;
+
+  strengths?: string[];
+  weaknesses?: string[];
+
+  detailedFeedback?: string;
+  hireRecommendation?: string;
+
+  transcript?: {
+    role: string;
+    text: string;
+  }[];
 }
 
 export interface IInterviewSession extends Document {
