@@ -15,6 +15,7 @@ import StartInterviewPage from './interview/pages/StartInterviewPage';
 import InterviewCompletePage from './interview/pages/InterviewCompletePage';
 import ActiveInterviewRoom from './interview/components/ActiveInterviewRoom';
 import VerifyInterviewLink from './interview/components/VerifyInterviewLink';
+import GenerateQuestionsPage from './pages/GenerateQuestionsPage';
 
 export const App = () => {
   return (
@@ -51,11 +52,7 @@ export const App = () => {
             <Route path="schedules" element={<SchedulesPage></SchedulesPage>} />
             <Route
               path="settings"
-              element={
-                <div className="p-8 text-2xl font-bold">
-                  Settings Page Coming Soon!
-                </div>
-              }
+              element={<GenerateQuestionsPage></GenerateQuestionsPage>}
             />
           </Route>
         </Route>

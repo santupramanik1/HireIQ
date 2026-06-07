@@ -77,13 +77,17 @@ export default function DashboardLayout() {
       <aside
         className={`fixed left-0 top-0 h-screen w-64 bg-white border-r border-slate-200 shadow-sm py-8 px-4 z-50 transform transition-transform duration-300 ease-in-out lg:translate-x-0 flex flex-col ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
-        <div className="mb-10 px-4 flex justify-between items-center">
-          <div className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-            <span className="material-symbols-outlined text-blue-600">
-              architecture
-            </span>
-            HireIQ
+        {/* --- SIDEBAR HEADER --- */}
+        <div className="mb-10 px-4 flex justify-between items-center h-10">
+          {/* Clean wrapper with no text styles and no border */}
+          <div className="flex items-center">
+            <img
+              src="/hireiq-logo.png"
+              alt="HireIQ Logo"
+              className="w-32 h-auto  object-contain"
+            />
           </div>
+
           <button
             onClick={() => setIsSidebarOpen(false)}
             className="lg:hidden text-slate-500 hover:text-slate-900"
@@ -92,6 +96,7 @@ export default function DashboardLayout() {
           </button>
         </div>
 
+        {/* --- NAVIGATION --- */}
         <nav className="flex-1 space-y-2">
           {navItems.map((item) => (
             <NavLink
