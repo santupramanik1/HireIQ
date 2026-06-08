@@ -43,16 +43,18 @@ const InterviewSchema = new Schema<IInterview>(
       default: 0,
     },
     technicalScore: { type: Number },
-communicationScore: { type: Number },
-confidenceScore: { type: Number },
-strengths: [{ type: String }],
-weaknesses: [{ type: String }],
-detailedFeedback: { type: String },
-hireRecommendation: { type: String },
-transcript: [{ 
-  role: { type: String },
-  text: { type: String }
-}],
+    communicationScore: { type: Number },
+    confidenceScore: { type: Number },
+    strengths: [{ type: String }],
+    weaknesses: [{ type: String }],
+    detailedFeedback: { type: String },
+    hireRecommendation: { type: String },
+    transcript: [
+      {
+        role: { type: String },
+        text: { type: String },
+      },
+    ],
   },
   {
     timestamps: true,

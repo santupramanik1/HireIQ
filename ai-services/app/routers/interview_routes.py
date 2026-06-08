@@ -1,10 +1,13 @@
-from fastapi import APIRouter, Request, status,Depends
+from fastapi import APIRouter, Request, status,Depends,HTTPException
 from fastapi.responses import JSONResponse
 from beanie import PydanticObjectId
+from pydantic import BaseModel
+from typing import List, Dict, Any
 
 from schema.interview_question_generation_schema import InterviewSetupCreate,InterviewSetupSave
 from services.interview_generation_services import create_interview_setup,save_interview_setup_to_db,get_secure_session_data, mark_session_completed
 from utils.auth_dependency import require_auth
+from services.interview_evaluation_services import evaluate_and_save_interview
 
 router = APIRouter()
 
@@ -138,3 +141,18 @@ async def complete_secure_interview(session_id: PydanticObjectId):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"success": False, "message": "Failed to close session."}
         )
+    
+class TranscriptPayload(BaseModel):
+    transcript: List[Dict[str, Any]]
+
+@router.post("/session/{interview_id}/evaluate")
+async def finalize_interview(interview_id: str, payload: TranscriptPayload):
+    try:
+        # We use the interview_id (which corresponds to your Mongo _id)
+        obj_id = PydanticObjectId(interview_id)
+        
+        result = await evaluate_and_save_interview(obj_id, payload.transcript)
+        
+        return {"success": True, "data": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

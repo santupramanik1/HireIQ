@@ -760,6 +760,7 @@ import { Logo } from '../../shared/components/Logo';
 import VapiModule from '@vapi-ai/web';
 import { MuteMicIcon } from '../../shared/components/MuteMicIcon';
 import UnmuteMicIcon from '../../shared/components/UnmuteMicIcon';
+import toast from 'react-hot-toast';
 
 const Vapi = (VapiModule as any).default || VapiModule;
 const vapi = new Vapi(`${import.meta.env.VITE_VAPI_PUBLIC_KEY}`);
@@ -960,12 +961,17 @@ export default function ActiveInterviewRoom() {
 
     try {
       // Burn the link so it can never be used again
+      // await axios.post(
+      //   `${import.meta.env.VITE_AI_API_BASE_URL || 'http://localhost:7000'}/api/interview/session/${sessionId}/complete`
+      // );
+
       await axios.post(
-        `${import.meta.env.VITE_AI_API_BASE_URL || 'http://localhost:7000'}/api/interview/session/${sessionId}/complete`
+        `${import.meta.env.VITE_AI_API_BASE_URL || 'http://localhost:7000'}/api/interview/session/${sessionId}/evaluate`,
+        { transcript: transcript } 
       );
       
-      alert("Interview Completed Successfully. Thank you for your time!");
-      navigate('/'); // Redirect the candidate away
+      toast.success("Interview Completed Successfully. Thank you for your time!");
+      navigate('/complete-interview'); // Redirect the candidate away
       
     } catch (error) {
       console.error("Failed to close session.", error);

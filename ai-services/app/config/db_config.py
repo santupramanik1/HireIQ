@@ -40,7 +40,7 @@ from beanie import init_beanie
 from models.interview_model import InterviewSetup
 from models.session_model import InterviewSession
 from models.candidate_model import Candidate
-
+from models.interview_evaluate_model import ATSInterview
 load_dotenv()
 
 class Database:
@@ -68,7 +68,8 @@ async def connect_to_mongodb():
             document_models=[
                 InterviewSetup,  
                 InterviewSession,
-                Candidate
+                Candidate,
+                ATSInterview
             ]
         )
 
