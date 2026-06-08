@@ -971,7 +971,20 @@ export default function ActiveInterviewRoom() {
       );
       
       toast.success("Interview Completed Successfully. Thank you for your time!");
-      navigate('/complete-interview'); // Redirect the candidate away
+      // Calculate stats to pass to the completion page
+      const totalDurationAllowed = (interviewData?.duration || 30) * 60;
+      const secondsElapsed = totalDurationAllowed - timer; // How long they actually spent
+      const userResponses = transcript.filter(msg => msg.role === 'user').length; // How many times they answered
+
+      // Redirect to the completion page, passing the dynamic state!
+      navigate('/complete-interview', { 
+        state: { 
+          candidateName: interviewData?.candidate_name,
+          jobTitle: interviewData?.job_title,
+          durationSeconds: secondsElapsed > 0 ? secondsElapsed : 0,
+          questionsAnswered: userResponses
+        } 
+      });
       
     } catch (error) {
       console.error("Failed to close session.", error);

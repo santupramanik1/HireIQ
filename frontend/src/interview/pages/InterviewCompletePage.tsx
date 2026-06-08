@@ -1,14 +1,25 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function InterviewCompletePage() {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // DUMMY DATA: In a real app, you might pass these via router state or fetch them
-  const candidateName = 'Santu Pramanik';
-  const jobTitle = 'Full Stack React Developer';
+  // Extract the state passed from the Interview Room, with fallbacks just in case
+  const {
+    candidateName = 'Candidate',
+    jobTitle = 'the role',
+    questionsAnswered = 0,
+    durationSeconds = 0,
+  } = location.state || {};
+
   const company = 'HireIQ';
-  const questionsAnswered = 2;
-  const duration = '0m 59s';
+
+  // Helper to format raw seconds into "Xm Ys"
+  const formatDuration = (totalSeconds: number) => {
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    return `${m}m ${s}s`;
+  };
 
   return (
     // Main Wrapper - Dark Theme Background
@@ -92,7 +103,7 @@ export default function InterviewCompletePage() {
                 {questionsAnswered}
               </span>
               <span className="text-xs text-slate-500 font-medium mt-1">
-                Questions answered
+                Responses given
               </span>
             </div>
 
@@ -100,7 +111,9 @@ export default function InterviewCompletePage() {
             <div className="w-px h-10 bg-slate-800"></div>
 
             <div className="flex flex-col items-center">
-              <span className="text-2xl font-bold text-white">{duration}</span>
+              <span className="text-2xl font-bold text-white">
+                {formatDuration(durationSeconds)}
+              </span>
               <span className="text-xs text-slate-500 font-medium mt-1">
                 Duration
               </span>
@@ -118,7 +131,7 @@ export default function InterviewCompletePage() {
                   1
                 </span>
                 <span className="text-sm text-slate-300 mt-0.5">
-                  Our team will review your interview responses
+                  Our team will review your interview responses and AI evaluation
                 </span>
               </li>
               <li className="flex items-start gap-4">
