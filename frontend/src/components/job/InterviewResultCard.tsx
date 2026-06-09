@@ -1,33 +1,92 @@
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Pie } from 'react-chartjs-2';
+
+ChartJS.register(ArcElement, Tooltip, Legend);
+
 interface InterviewResultCardProps {
   candidate: any;
 }
 
-export const InterviewResultCard = ({
-  candidate,
-}: InterviewResultCardProps) => {
+export const InterviewResultCard = ({ candidate }: InterviewResultCardProps) => {
+ 
+ const voiceData = candidate?.aiAnalysis?.voiceInterview || {};
+  const chartData = {
+    labels: ['Communication', 'Technical Depth', 'Confidence'],
+    datasets: [
+      {
+        label: 'Score Breakdown',
+        data: [
+          voiceData.communicationScore || 0,
+          voiceData.technicalScore || 0,
+          voiceData.confidenceScore || 0,
+        ],
+        // Three distinct colors for the three slices (Blue, Indigo, Purple)
+        backgroundColor: [
+          'rgba(59, 130, 246, 0.7)', 
+          'rgba(99, 102, 241, 0.7)', 
+          'rgba(168, 85, 247, 0.7)', 
+        ],
+        borderColor: [
+          'rgba(59, 130, 246, 1)',
+          'rgba(99, 102, 241, 1)',
+          'rgba(168, 85, 247, 1)',
+        ],
+        borderWidth: 1,
+        hoverOffset: 4, 
+      },
+    ],
+  };
+
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'right' as const, 
+        labels: {
+          font: {
+            size: 11,
+            family: "'Inter', sans-serif",
+            weight: 'bold' as const,
+          },
+          color: '#4b5563', // gray-600
+          padding: 15,
+          usePointStyle: true, // Makes the legend markers circular instead of boxes
+        },
+      },
+      tooltip: {
+        backgroundColor: 'rgba(17, 24, 39, 0.9)', // gray-900
+        padding: 10,
+        cornerRadius: 8,
+        callbacks: {
+          label: function(context: any) {
+            return ` ${context.label}: ${context.raw}%`;
+          }
+        }
+      },
+    },
+  };
+
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col min-h-62.5">
+    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col min-h-[25rem]">
       {/* Card Header & Status Badge */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
-            />
-          </svg>
-          Interview Analysis
+          <span className="material-symbols-outlined text-[16px]">
+            analytics
+          </span>
+          Interview Performance
         </h2>
 
         {/* Dynamic Status Badge */}
-        {candidate?.aiAnalysis?.voiceInterview?.status === 'completed' ? (
+        {voiceData.status === 'completed' ? (
           <span className="px-3 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-full border border-green-200">
             Completed
           </span>
@@ -39,140 +98,39 @@ export const InterviewResultCard = ({
       </div>
 
       {/* CONDITIONAL RENDERING */}
-      {candidate?.aiAnalysis?.voiceInterview?.status === 'completed' ? (
-        // --- COMPLETED STATE: Show the charts ---
+      {voiceData.status === 'completed' ? (
         <>
-          <div className="flex flex-col md:flex-row gap-6 mb-6">
+          <div className="flex flex-col md:flex-row gap-6 mb-6 flex-1">
             {/* Overall Score Box */}
-            <div className="flex flex-col items-center justify-center p-4 bg-indigo-50 rounded-xl border border-indigo-100 min-w-30">
-              <span className="text-3xl font-black text-indigo-700">
-                {candidate.aiAnalysis.voiceInterview.overallScore}%
+            <div className="flex flex-col items-center justify-center p-6 bg-indigo-50 rounded-xl border border-indigo-100 min-w-[140px]">
+              <span className="text-4xl font-black text-indigo-700">
+                {voiceData.overallScore || 0}%
               </span>
-              <span className="text-xs text-indigo-900/60 font-semibold mt-1 uppercase tracking-wide">
-                Overall
+              <span className="text-xs text-indigo-900/60 font-semibold mt-2 uppercase tracking-wide text-center">
+                Overall<br />Performance
               </span>
             </div>
 
-            {/* Detailed Metrics */}
-            <div className="flex-1 space-y-4 justify-center flex flex-col">
-              <div>
-                <div className="flex justify-between text-xs font-medium mb-1.5">
-                  <span className="text-gray-700">Communication Skills</span>
-                  <span className="text-gray-900">
-                    {candidate.aiAnalysis.voiceInterview.communicationScore}%
-                  </span>
-                </div>
-                <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                  <div
-                    className="bg-blue-500 h-1.5 rounded-full transition-all duration-1000"
-                    style={{
-                      width: `${candidate.aiAnalysis.voiceInterview.communicationScore}%`,
-                    }}
-                  ></div>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-xs font-medium mb-1.5">
-                  <span className="text-gray-700">Technical Depth</span>
-                  <span className="text-gray-900">
-                    {candidate.aiAnalysis.voiceInterview.technicalScore}%
-                  </span>
-                </div>
-                <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                  <div
-                    className="bg-indigo-500 h-1.5 rounded-full transition-all duration-1000"
-                    style={{
-                      width: `${candidate.aiAnalysis.voiceInterview.technicalScore}%`,
-                    }}
-                  ></div>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-xs font-medium mb-1.5">
-                  <span className="text-gray-700">Problem Solving</span>
-                  <span className="text-gray-900">
-                    {candidate.aiAnalysis.voiceInterview.problemSolvingScore}%
-                  </span>
-                </div>
-                <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                  <div
-                    className="bg-purple-500 h-1.5 rounded-full transition-all duration-1000"
-                    style={{
-                      width: `${candidate.aiAnalysis.voiceInterview.problemSolvingScore}%`,
-                    }}
-                  ></div>
-                </div>
-              </div>
+            {/* Chart.js Pie Graph Container */}
+            <div className="flex-1 min-h-[200px] w-full relative flex items-center justify-center pl-2">
+              <Pie data={chartData} options={chartOptions} />
             </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="mt-auto pt-5 border-t border-gray-100 flex flex-col sm:flex-row gap-3">
-            <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors shadow-sm">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-              Play Recording
-            </button>
-            <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              View Transcript
-            </button>
           </div>
         </>
       ) : (
-        // --- PENDING STATE: Show the empty placeholder ---
+        // --- PENDING STATE ---
         <div className="flex-1 flex flex-col items-center justify-center text-center py-8">
           <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 border border-gray-200">
-            <svg
-              className="w-8 h-8 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1.5"
-                d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
-              />
-            </svg>
+            <span className="material-symbols-outlined text-gray-400 text-3xl">mic</span>
           </div>
           <h3 className="text-sm font-semibold text-gray-900 mb-1">
             Awaiting AI Interview
           </h3>
           <p className="text-gray-500 text-sm mb-6 max-w-xs">
-            Voice screening analysis will appear here after the candidate
-            completes their automated interview.
+            Voice screening analysis and performance graphs will appear here after the candidate completes their automated interview.
           </p>
           <button className="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2">
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
+            <span className="material-symbols-outlined text-[18px]">send</span>
             Send Interview Invite
           </button>
         </div>

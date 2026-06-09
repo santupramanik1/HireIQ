@@ -9,6 +9,31 @@ import GithubIcon from '../shared/components/GithubIcon';
 import { InterviewResultCard } from '../components/job/InterviewResultCard';
 
 //  Define the exact shape of our new backend response
+// interface CandidateProfile {
+//   applicationId: string;
+//   name: string;
+//   role: string;
+//   company: string;
+//   status: string;
+//   contact: {
+//     email: string;
+//     phone: string;
+//     location: string;
+//     linkedin: string;
+//     github: string;
+//     resumeUrl: string;
+//   };
+//   aiAnalysis: {
+//     matchScore: number;
+//     matchedSkills: string[];
+//     missingSkills: string[];
+//     summary: string;
+//     strengths: string[];
+//     improvements: string[];
+//     scoreReasoning: string;
+//   };
+// }
+
 interface CandidateProfile {
   applicationId: string;
   name: string;
@@ -23,7 +48,7 @@ interface CandidateProfile {
     github: string;
     resumeUrl: string;
   };
-  aiAnalysis: {
+ aiAnalysis: {
     matchScore: number;
     matchedSkills: string[];
     missingSkills: string[];
@@ -31,9 +56,15 @@ interface CandidateProfile {
     strengths: string[];
     improvements: string[];
     scoreReasoning: string;
+    voiceInterview?: {
+      status: string;
+      overallScore: number;
+      communicationScore: number;
+      technicalScore: number;
+      confidenceScore: number; // <--- Changed this from problemSolvingScore
+    };
   };
 }
-
 export default function CandidateInfoPage() {
   const navigate = useNavigate();
   const { id } = useParams();
