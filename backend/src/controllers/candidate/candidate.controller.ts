@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { Application } from '../../models/application/application.model.js';
 import mongoose from 'mongoose';
 import { ResumeAnalysis } from '../../models/resume/resumeAnalysis.model.js';
+import { Interview } from '../../models/interview/interview.model.js';
 
 /**
  * @desc Get a list of all candidates who have applied for any job
@@ -71,6 +72,7 @@ export const getAllAppliedCandidates = async (req: Request, res: Response) => {
  * @route   GET /api/applications/:id
  * @access  Private/Admin
  */
+
 export const candidateInfoById = async (
   req: Request<{ id: string }>,
   res: Response
@@ -85,7 +87,6 @@ export const candidateInfoById = async (
       return;
     }
 
-    // Fetch Application + Candidate + Job
     const application = await Application.findById(id)
       .populate({
         path: 'candidateID',
@@ -105,14 +106,13 @@ export const candidateInfoById = async (
       return;
     }
 
-    // Fetch the AI Analysis linked to this Application
     const analysis = await ResumeAnalysis.findOne({ applicationId: id }).lean();
 
-    // Type assertions
+    const interview = await Interview.findOne({ applicationId: id }).lean();
+
     const candidate = application.candidateID as any;
     const job = application.jobID as any;
 
-    //  Format payload to match the React frontend exactly
     const formattedResponse = {
       applicationId: application._id,
       name: candidate?.name || 'Unknown',
@@ -129,7 +129,6 @@ export const candidateInfoById = async (
         resumeUrl: candidate?.latestResumeUrl || '#',
       },
 
-      // Merge AI Analysis Data gracefully (fallback if analysis is still processing)
       aiAnalysis: {
         matchScore: analysis?.matchScore || 0,
         matchedSkills: analysis?.matchedSkill || [],
@@ -138,6 +137,15 @@ export const candidateInfoById = async (
         strengths: analysis?.strengths || [],
         improvements: analysis?.areasToImprove || [],
         scoreReasoning: analysis?.score_reasoning || '',
+
+        // --- NEW: Injecting dynamic voice interview data ---
+        voiceInterview: {
+          status: interview?.status || 'pending',
+          overallScore: interview?.overallScore || 0,
+          communicationScore: interview?.communicationScore || 0,
+          technicalScore: interview?.technicalScore || 0,
+          confidenceScore: interview?.confidenceScore || 0, // Using confidence instead of problem-solving
+        },
       },
     };
 
@@ -147,7 +155,6 @@ export const candidateInfoById = async (
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
-
 /**
  * @desc    Get top matched candidates for a specific job based on AI analysis score
  * @route   GET /api/applications/matched-candidates/:jobId

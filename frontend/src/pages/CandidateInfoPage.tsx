@@ -8,32 +8,6 @@ import LinkedinIcon from '../shared/components/LinkedinIcon';
 import GithubIcon from '../shared/components/GithubIcon';
 import { InterviewResultCard } from '../components/job/InterviewResultCard';
 
-//  Define the exact shape of our new backend response
-// interface CandidateProfile {
-//   applicationId: string;
-//   name: string;
-//   role: string;
-//   company: string;
-//   status: string;
-//   contact: {
-//     email: string;
-//     phone: string;
-//     location: string;
-//     linkedin: string;
-//     github: string;
-//     resumeUrl: string;
-//   };
-//   aiAnalysis: {
-//     matchScore: number;
-//     matchedSkills: string[];
-//     missingSkills: string[];
-//     summary: string;
-//     strengths: string[];
-//     improvements: string[];
-//     scoreReasoning: string;
-//   };
-// }
-
 interface CandidateProfile {
   applicationId: string;
   name: string;
@@ -61,7 +35,7 @@ interface CandidateProfile {
       overallScore: number;
       communicationScore: number;
       technicalScore: number;
-      confidenceScore: number; // <--- Changed this from problemSolvingScore
+      confidenceScore: number; 
     };
   };
 }
@@ -73,7 +47,7 @@ export default function CandidateInfoPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 2. Fetch Real Data
+  // Fetch Real Data
   useEffect(() => {
     const fetchCandidateData = async () => {
       try {

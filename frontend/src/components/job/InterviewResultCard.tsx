@@ -75,7 +75,7 @@ export const InterviewResultCard = ({ candidate }: InterviewResultCardProps) => 
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col min-h-[25rem]">
+    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col min-h-100">
       {/* Card Header & Status Badge */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
@@ -102,7 +102,7 @@ export const InterviewResultCard = ({ candidate }: InterviewResultCardProps) => 
         <>
           <div className="flex flex-col md:flex-row gap-6 mb-6 flex-1">
             {/* Overall Score Box */}
-            <div className="flex flex-col items-center justify-center p-6 bg-indigo-50 rounded-xl border border-indigo-100 min-w-[140px]">
+            <div className="flex flex-col items-center justify-center p-6 bg-indigo-50 rounded-xl border border-indigo-100 min-w-35">
               <span className="text-4xl font-black text-indigo-700">
                 {voiceData.overallScore || 0}%
               </span>
@@ -112,7 +112,7 @@ export const InterviewResultCard = ({ candidate }: InterviewResultCardProps) => 
             </div>
 
             {/* Chart.js Pie Graph Container */}
-            <div className="flex-1 min-h-[200px] w-full relative flex items-center justify-center pl-2">
+            <div className="flex-1 min-h-50 w-full relative flex items-center justify-center pl-2">
               <Pie data={chartData} options={chartOptions} />
             </div>
           </div>
