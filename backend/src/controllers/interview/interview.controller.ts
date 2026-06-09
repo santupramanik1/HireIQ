@@ -338,6 +338,53 @@ export const getPendingInvites = async (req: Request, res: Response) => {
   }
 };
 
+
+// Fetch Completed Interviews for a Job
+export const getCompletedInterviews = async (req: Request, res: Response) => {
+  try {
+    const jobId = req.params.jobId as string;
+
+    if (!jobId) {
+      return res.status(400).json({ success: false, message: 'Job ID is required' });
+    }
+
+    // Find interviews where status is 'completed'
+    const completedInterviews = await Interview.find({ 
+      jobId, 
+      status: 'completed' 
+    })
+    .populate('candidateId', 'name email')
+    .populate('jobId', 'title company');
+
+    // Format the data including all the AI Evaluation scores
+    const formattedData = completedInterviews.map((item: any) => ({
+      id: item._id,
+      candidateName: item.candidateId?.name || 'Unknown Candidate',
+      candidateEmail: item.candidateId?.email || '',
+      role: item.jobId?.title || 'Candidate',
+      company: item.jobId?.company || 'HireIQ',
+      invitedAt: item.createdAt,
+      updatedAt: item.updatedAt,
+      
+      // AI Scores & Feedback
+      overallScore: item.overallScore || 0,
+      technicalScore: item.technicalScore || 0,
+      communicationScore: item.communicationScore || 0,
+      confidenceScore: item.confidenceScore || 0,
+      strengths: item.strengths || [],
+      weaknesses: item.weaknesses || [],
+      detailedFeedback: item.detailedFeedback || '',
+      hireRecommendation: item.hireRecommendation || 'Hold',
+      transcript: item.transcript || []
+    }));
+
+    return res.status(200).json({ success: true, data: formattedData });
+  } catch (error: any) {
+    console.error("Error fetching completed interviews:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 /**
  * @desc    Get interview details by ID (with candidate and job info)
  * @route   GET /api/interviews/:id
