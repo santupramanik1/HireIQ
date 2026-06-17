@@ -149,7 +149,7 @@ export default function CreateJobModal({
           </div>
 
           {/* AI Auto-fill Section */}
-          <div className="border border-dashed border-blue-200 bg-blue-50/50 rounded-2xl p-5 mb-8">
+          {/* <div className="border border-dashed border-blue-200 bg-blue-50/50 rounded-2xl p-5 mb-8">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
                 <span className="material-symbols-outlined text-[18px]">
@@ -186,7 +186,7 @@ export default function CreateJobModal({
                 {isGenerating ? 'Generating...' : 'Generate'}
               </button>
             </div>
-          </div>
+          </div> */}
 
           {/* Divider */}
           <div className="flex items-center gap-4 mb-8">

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
 
 export interface JobSalary {
   min: number;
@@ -58,6 +59,22 @@ export function JobCard({
     setIsMenuOpen(false);
     if (_id) {
       onStatusChange(_id, newStatus);
+    }
+  };
+
+  const handleGetLink = async (jobId: string) => {
+    try {
+      // Construct the link based on your frontend routing
+      const applicationLink = `${window.location.origin}/apply/${jobId}`;
+
+      // Copy to clipboard
+      await navigator.clipboard.writeText(applicationLink);
+
+      // Show a success toast
+      toast.success('Application link copied to clipboard!');
+    } catch (error) {
+      console.error('Failed to copy', error);
+      toast.error('Failed to copy the link.');
     }
   };
 
@@ -121,6 +138,13 @@ export function JobCard({
                 className="w-full text-left px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-red-600 transition-colors cursor-pointer"
               >
                 Set Expired
+              </button>
+
+              <button
+                onClick={() => _id && handleGetLink(_id)} // Pass your jobId here
+                className="w-full text-left px-4 py-2 text-sm font-medium text-indigo-600 hover:bg-slate-50 hover:text-blue-600 transition-colors cursor-pointer"
+              >
+                Get Application Link
               </button>
             </div>
           )}
