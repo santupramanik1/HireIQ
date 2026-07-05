@@ -18,7 +18,7 @@ interface NavItem {
 // ==========================================
 
 const navItems: NavItem[] = [
-  // { icon: 'home', label: 'Home', path: '/dashboard' },
+  { icon: 'home', label: 'Home', path: '/dashboard' },
   { icon: 'work', label: 'Jobs', path: '/dashboard/jobs' },
   { icon: 'group', label: 'Candidates', path: '/dashboard/candidates' },
   { icon: 'calendar_today', label: 'Schedules', path: '/dashboard/schedules' },
@@ -169,7 +169,7 @@ export default function DashboardLayout() {
             >
               <span className="material-symbols-outlined text-2xl">menu</span>
             </button>
-            {/* <div className="relative w-full max-w-md hidden md:block">
+            <div className="relative w-full max-w-md hidden md:block">
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">
                 search
               </span>
@@ -178,13 +178,13 @@ export default function DashboardLayout() {
                 placeholder="Search jobs or candidates..."
                 type="text"
               />
-            </div> */}
+            </div>
           </div>
 
           <div className="flex items-center gap-3 sm:gap-4">
-            {/* <button className="p-2.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200 flex items-center justify-center cursor-pointer">
+            <button className="p-2.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200 flex items-center justify-center cursor-pointer">
               <span className="material-symbols-outlined">notifications</span>
-            </button> */}
+            </button>
             <button
               onClick={() => setIsCreateModalOpen(true)}
               className="flex cursor-pointer items-center gap-2 bg-[#4647D3] text-white px-5 sm:px-6 py-2.5 rounded-full font-semibold text-sm hover:bg-[#4647D5] hover:shadow-md transition-all active:scale-95"
