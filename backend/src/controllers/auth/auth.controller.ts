@@ -35,6 +35,7 @@ export const login = async (req: Request, res: Response) => {
 
     // Set Access Token Cookie (15 mins)
     res.cookie('access_token', result.tokens.accessToken, {
+      domain: 'https://hireiq-backend.vercel.app',
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? 'none' : 'lax',
@@ -45,6 +46,7 @@ export const login = async (req: Request, res: Response) => {
     // Set Refresh Token Cookie (30 mins)
     res.cookie('refresh_token', result.tokens.refreshToken, {
       httpOnly: true,
+      domain: 'https://hireiq-backend.vercel.app',
       secure: isProduction,
       sameSite: isProduction ? 'none' : 'lax',
       maxAge: 30 * 60 * 1000,
