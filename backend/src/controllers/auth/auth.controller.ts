@@ -46,7 +46,7 @@ export const login = async (req: Request, res: Response) => {
     res.cookie('refresh_token', result.tokens.refreshToken, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'lax',
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: 30 * 60 * 1000,
       path: '/',
     });
@@ -71,7 +71,7 @@ export const logout = async (req: Request, res: Response) => {
     res.clearCookie('access_token', {
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'lax',
+      sameSite: isProduction ? 'none' : 'lax',
       path: '/',
     });
 
@@ -79,7 +79,7 @@ export const logout = async (req: Request, res: Response) => {
     res.clearCookie('refresh_token', {
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'lax',
+      sameSite: isProduction ? 'none' : 'lax',
       path: '/',
     });
 
