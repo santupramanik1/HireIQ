@@ -6,6 +6,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import PublicRoute from './components/auth/PublicRoute';
 import { Toaster } from 'react-hot-toast';
 import DashboardLayout from './pages/DashboardLayoutPage';
+import DashboardPage from './pages/DashboardPage';
 import JobsPage from './pages/JobsPage';
 import ApplyJobPage from './pages/ApplyJobPage';
 import CandidateTable from './pages/CandidatesPage';
@@ -39,9 +40,7 @@ export const App = () => {
             <Route
               index
               element={
-                <div className="p-8 text-2xl font-bold">
-                  Dashboard Report Coming Soon!!
-                </div>
+                <DashboardPage />
               }
             />
             <Route path="jobs" element={<JobsPage />} />

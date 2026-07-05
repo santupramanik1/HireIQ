@@ -18,7 +18,7 @@ interface NavItem {
 // ==========================================
 
 const navItems: NavItem[] = [
-  // { icon: 'home', label: 'Home', path: '/dashboard' },
+  { icon: 'dashboard', label: 'Dashboard', path: '/dashboard' },
   { icon: 'work', label: 'Jobs', path: '/dashboard/jobs' },
   { icon: 'group', label: 'Candidates', path: '/dashboard/candidates' },
   { icon: 'calendar_today', label: 'Schedules', path: '/dashboard/schedules' },

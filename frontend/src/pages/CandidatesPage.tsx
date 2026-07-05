@@ -79,7 +79,7 @@ export default function CandidateTable() {
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
             ></path>
           </svg>
-          <p>Loading candidate pipeline...</p>
+          <p>Loading candidates...</p>
         </div>
       </div>
     );
@@ -116,7 +116,7 @@ export default function CandidateTable() {
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-            Candidate Pipeline
+            Candidates List
             <span className="px-3 py-1 text-xs font-semibold bg-blue-50 text-blue-700 rounded-full border border-blue-200 shadow-sm">
               {totalItems} Total
             </span>
