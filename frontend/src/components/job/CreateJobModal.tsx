@@ -15,6 +15,8 @@ export default function CreateJobModal({
 }: CreateJobModalProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [skillInput, setSkillInput] = useState('');
 
   const [formData, setFormData] = useState({
     title: '',
@@ -26,7 +28,7 @@ export default function CreateJobModal({
     maxSalary: '',
     currency: 'USD',
     description: '',
-    skills: '',
+    skills: [] as string[],
     requirements: '',
     responsibilities: '',
   });
@@ -45,11 +47,64 @@ export default function CreateJobModal({
 
   if (!isOpen) return null;
 
-  const handleAutoFill = (e: React.MouseEvent) => {
+  const handleAutoFill = async (e: React.MouseEvent) => {
     e.preventDefault();
+    if (!aiPrompt.trim()) {
+      toast.error('Please enter a job title or prompt first.');
+      return;
+    }
     setIsGenerating(true);
-    // Simulate API call
-    setTimeout(() => setIsGenerating(false), 1500);
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_AI_API_BASE_URL || 'http://localhost:7000'}/api/generate-job`,
+        { prompt: aiPrompt }
+      );
+      if (response.data && response.data.status === 'success') {
+        const job = response.data.data;
+        setFormData((prev) => ({
+          ...prev,
+          title: job.title || prev.title,
+          department: job.department || prev.department,
+          description: job.description || prev.description,
+          skills: typeof job.skills === 'string'
+            ? job.skills.split(',').map((s: string) => s.trim()).filter(Boolean)
+            : Array.isArray(job.skills) ? job.skills : [],
+          requirements: job.requirements || prev.requirements,
+          responsibilities: job.responsibilities || prev.responsibilities,
+          minSalary: job.minSalary ? String(job.minSalary) : prev.minSalary,
+          maxSalary: job.maxSalary ? String(job.maxSalary) : prev.maxSalary,
+        }));
+        toast.success('Job details auto-filled successfully!');
+      } else {
+        toast.error('Failed to generate job details.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error('Error generating job details. Please try again.');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleRemoveSkill = (skillToRemove: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      skills: prev.skills.filter((s) => s !== skillToRemove),
+    }));
+  };
+
+  const handleSkillKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const trimmed = skillInput.trim().replace(/,$/, '');
+      if (trimmed && !formData.skills.includes(trimmed)) {
+        setFormData((prev) => ({
+          ...prev,
+          skills: [...prev.skills, trimmed],
+        }));
+      }
+      setSkillInput('');
+    }
   };
 
   // Trigger on Input change
@@ -110,10 +165,12 @@ export default function CreateJobModal({
       maxSalary: '',
       currency: 'USD',
       description: '',
-      skills: '',
+      skills: [] as string[],
       requirements: '',
       responsibilities: '',
     });
+    setAiPrompt('');
+    setSkillInput('');
   };
 
   return (
@@ -149,7 +206,7 @@ export default function CreateJobModal({
           </div>
 
           {/* AI Auto-fill Section */}
-          {/* <div className="border border-dashed border-blue-200 bg-blue-50/50 rounded-2xl p-5 mb-8">
+          <div className="border border-dashed border-blue-200 bg-blue-50/50 rounded-2xl p-5 mb-8">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
                 <span className="material-symbols-outlined text-[18px]">
@@ -168,6 +225,8 @@ export default function CreateJobModal({
             <div className="flex flex-col sm:flex-row gap-3">
               <input
                 type="text"
+                value={aiPrompt}
+                onChange={(e) => setAiPrompt(e.target.value)}
                 placeholder="e.g. Senior React Engineer, Product Manager"
                 className="flex-1 bg-white border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 p-3 transition-all outline-none placeholder:text-slate-400 shadow-sm"
               />
@@ -186,7 +245,7 @@ export default function CreateJobModal({
                 {isGenerating ? 'Generating...' : 'Generate'}
               </button>
             </div>
-          </div> */}
+          </div>
 
           {/* Divider */}
           <div className="flex items-center gap-4 mb-8">
@@ -338,18 +397,41 @@ export default function CreateJobModal({
             </div>
 
             {/* Row 5: Halves */}
-            <div className="col-span-6 sm:col-span-3">
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+            <div className="col-span-6 sm:col-span-3 flex flex-col gap-2">
+              <label className="block text-sm font-semibold text-slate-700">
                 Skills
               </label>
-              <textarea
-                rows={3}
-                name="skills"
-                value={formData.skills}
-                onChange={handleInputChange}
-                placeholder="Key skills..."
-                className="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 block p-3 outline-none transition-all shadow-sm resize-none"
-              ></textarea>
+              
+              {/* Active Tags */}
+              {formData.skills.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 p-2 bg-slate-50 border border-slate-200 rounded-xl">
+                  {formData.skills.map((skill, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-lg border border-blue-100/80 shadow-xs"
+                    >
+                      {skill}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveSkill(skill)}
+                        className="hover:text-blue-900 font-extrabold ml-1 cursor-pointer text-[14px] leading-none"
+                      >
+                        &times;
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Tag Input */}
+              <input
+                type="text"
+                value={skillInput}
+                onChange={(e) => setSkillInput(e.target.value)}
+                onKeyDown={handleSkillKeyDown}
+                placeholder="Type skill & press Enter or comma"
+                className="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 block p-3 outline-none transition-all shadow-sm"
+              />
             </div>
             <div className="col-span-6 sm:col-span-3">
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">
@@ -394,8 +476,12 @@ export default function CreateJobModal({
           <button
             type="submit"
             form="create-job-form"
-            disabled={isSubmitting}
-            className="px-6 py-2.5 text-sm font-bold text-white button-bg-color cursor-pointer rounded-xl hover:bg-blue-700 shadow-sm transition-colors flex items-center justify-center gap-2"
+            disabled={isSubmitting || !formData.title.trim() || !formData.department.trim() || !formData.location.trim() || !formData.description.trim() || formData.skills.length === 0}
+            className={`px-6 py-2.5 text-sm font-bold text-white rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 ${
+              isSubmitting || !formData.title.trim() || !formData.department.trim() || !formData.location.trim() || !formData.description.trim() || formData.skills.length === 0
+                ? 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed'
+                : 'button-bg-color hover:bg-blue-700 cursor-pointer active:scale-95'
+            }`}
           >
             {isSubmitting ? (
               <>

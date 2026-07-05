@@ -1,9 +1,10 @@
 from fastapi import APIRouter
-from schema.resume_request_schema import ResumeExtractRequest,EvaluateMatchRequest
+from schema.resume_request_schema import ResumeExtractRequest, EvaluateMatchRequest, JobGenerateRequest
 from schema.result_evaluation_schema import EvaluationResult
 router = APIRouter()
 from services.resume_parser_services import process_resume_url
 from services.candidate_evaluation_services import evaluate_candidate_match
+from services.job_generation_services import generate_job_details
 
 # Extract the name,email and skill and return to display in the application form
 @router.post("/extract")
@@ -26,6 +27,12 @@ async def handle_resume_evaluation(request_data:EvaluateMatchRequest):
         raw_resume=request_data.raw_resume
     )
     
+   return {"status": "success", "data": result}
+
+# Generate job details based on a prompt/title
+@router.post("/generate-job")
+async def handle_job_generation(request_data: JobGenerateRequest):
+   result = await generate_job_details(request_data.prompt)
    return {"status": "success", "data": result}
     
 

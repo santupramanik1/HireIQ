@@ -10,3 +10,6 @@ class EvaluateMatchRequest(BaseModel):
     jd_text: str
     form_data: Dict[str, Any]
     raw_resume: str
+
+class JobGenerateRequest(BaseModel):
+    prompt: str
