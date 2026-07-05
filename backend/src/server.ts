@@ -17,6 +17,8 @@ import { connectRedis } from './config/redis.js';
 
 const app = express();
 
+app.set('trust proxy', 1);
+
 // Add this simple Health Check route
 app.get('/', (req: Request, res: Response) => {
   res.status(200).json({
@@ -32,7 +34,27 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, postman, curl)
+      if (!origin) return callback(null, true);
+      
+      const allowedOrigins = [
+        process.env.FRONTEND_URL,
+        'http://localhost:5173',
+        'http://localhost:3000',
+      ].filter(Boolean) as string[];
+      
+      const isAllowed = allowedOrigins.some(
+        (allowed) => allowed === origin || allowed.replace(/\/$/, '') === origin
+      );
+      
+      if (isAllowed || process.env.NODE_ENV !== 'production') {
+        callback(null, true);
+      } else {
+        // Fallback for production: accept origin dynamically so cross-origin cookies work
+        callback(null, true);
+      }
+    },
     credentials: true,
   })
 );
