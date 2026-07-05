@@ -35,6 +35,10 @@ export default function JobsPage() {
     setActiveJobId(id);
     setIsMatchModalOpen(true);
   };
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
+
   // Grab the trigger from the parent Layout
   const { refreshTrigger } = useOutletContext<DashboardContext>();
 
@@ -57,6 +61,7 @@ export default function JobsPage() {
 
   useEffect(() => {
     fetchJobs();
+    setCurrentPage(1); // Reset page on refresh
   }, [refreshTrigger]);
 
   const handleStatusChange = async (jobId: string, newStatus: string) => {
@@ -89,6 +94,19 @@ export default function JobsPage() {
   const expiredCount = jobList.filter(
     (job) => job.status.toLowerCase() === 'expired'
   ).length;
+
+  // Pagination calculation
+  const totalItems = jobList.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentJobs = jobList.slice(indexOfFirstItem, indexOfLastItem);
+
+  const handlePageChange = (pageNumber: number) => {
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
+  };
 
   const metrics: MetricCard[] = [
     {
@@ -162,7 +180,7 @@ export default function JobsPage() {
       <div className="flex justify-between items-end mb-6">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
-            Showing {jobList.length} jobs
+            Showing {totalItems} jobs
           </h2>
           <p className="text-slate-500 text-sm mt-1">
             Sort by:{' '}
@@ -177,22 +195,70 @@ export default function JobsPage() {
       {isLoading ? (
         <p className="text-slate-500">Loading jobs...</p>
       ) : (
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {jobList.map((job) => (
-            <JobCard
-              key={job._id}
-              _id={job._id}
-              status={job.status}
-              title={job.title}
-              type={job.type}
-              department={job.department}
-              salary={job.salary}
-              matchCount={job.matchCount || 0}
-              onStatusChange={handleStatusChange}
-              onFindMatches={handleOpenMatchModal}
-            />
-          ))}
-        </section>
+        <div className="flex flex-col gap-8">
+          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {currentJobs.map((job) => (
+              <JobCard
+                key={job._id}
+                _id={job._id}
+                status={job.status}
+                title={job.title}
+                type={job.type}
+                department={job.department}
+                salary={job.salary}
+                matchCount={job.matchCount || 0}
+                onStatusChange={handleStatusChange}
+                onFindMatches={handleOpenMatchModal}
+              />
+            ))}
+          </section>
+
+          {/* Pagination Controls */}
+          {totalItems > 0 && (
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 px-6 py-4 bg-white border border-slate-200 rounded-xl shadow-sm">
+              <span className="text-sm text-gray-600 font-medium font-class">
+                Showing <span className="font-bold text-gray-900">{totalItems === 0 ? 0 : indexOfFirstItem + 1}</span> to{' '}
+                <span className="font-bold text-gray-900">{Math.min(indexOfLastItem, totalItems)}</span> of{' '}
+                <span className="font-bold text-gray-900">{totalItems}</span> jobs
+              </span>
+
+              <div className="inline-flex items-center gap-1.5 font-class">
+                {/* Previous Page Button */}
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="flex items-center justify-center p-2 rounded-lg border border-gray-200 bg-white text-gray-500 hover:text-gray-800 hover:bg-slate-50 disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-gray-500 transition-all cursor-pointer select-none"
+                >
+                  <span className="material-symbols-outlined text-[20px]">chevron_left</span>
+                </button>
+
+                {/* Page Numbers */}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`min-w-9 h-9 flex items-center justify-center rounded-lg text-sm font-bold border transition-all cursor-pointer select-none ${
+                      currentPage === page
+                        ? 'bg-blue-600 border-blue-600 text-white shadow-sm shadow-blue-600/20'
+                        : 'bg-white border-gray-200 text-gray-600 hover:bg-slate-50 hover:text-gray-900'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                {/* Next Page Button */}
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="flex items-center justify-center p-2 rounded-lg border border-gray-200 bg-white text-gray-500 hover:text-gray-800 hover:bg-slate-50 disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-gray-500 transition-all cursor-pointer select-none"
+                >
+                  <span className="material-symbols-outlined text-[20px]">chevron_right</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       )}
 
       <MatchCandidatesModal
