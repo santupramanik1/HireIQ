@@ -10,10 +10,11 @@ def get_llm():
         raise ValueError("OPEN_ROUTER_BASE_URL environment variable is missing in your .env file!")
     
     llm=ChatOpenAI(
-        model="openrouter/free",
+        model="google/gemini-2.5-flash",
         api_key=api_key,
         base_url=baseUrl,
-        temperature=0
+        temperature=0,
+        max_tokens=1500
     )
 
     return llm
