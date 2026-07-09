@@ -7,6 +7,7 @@ import mongoose, { Types } from 'mongoose';
 import { uploadToCloudinary } from '../../config/cloudinary.js';
 import axios from 'axios';
 import { ResumeAnalysis } from '../../models/resume/resumeAnalysis.model.js';
+import { sendApplicationConfirmationEmail } from '../email/email.controller.js';
 
 //PRIVATE: CREATE A NEW JOB
 export const createJob = async (req: Request, res: Response) => {
@@ -460,6 +461,15 @@ export const submitApplication = async (req: Request, res: Response) => {
     if (evaluationResult.matchScore > 50) {
       await Job.findByIdAndUpdate(jobObjectId, { $inc: { matchCount: 1 } });
     }
+
+    // Send application confirmation email to candidate asynchronously
+    sendApplicationConfirmationEmail({
+      to: email.toLowerCase().trim(),
+      candidateName: name.trim(),
+      jobTitle: job.title,
+    }).catch((emailErr) => {
+      console.error('Failed to send confirmation email:', emailErr);
+    });
 
     return res.status(201).json({
       success: true,

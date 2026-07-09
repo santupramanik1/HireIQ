@@ -123,3 +123,46 @@ export const sendInterviewInviteEmail = async (params: EmailInviteParams): Promi
     throw error;
   }
 };
+
+interface ApplicationConfirmationParams {
+  to: string;
+  candidateName: string;
+  jobTitle: string;
+}
+
+export const sendApplicationConfirmationEmail = async (params: ApplicationConfirmationParams): Promise<any> => {
+  try {
+    const templatePath = path.join(
+      process.cwd(),
+      'src',
+      'templates',
+      'application-confirmation.html'
+    );
+    let htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
+
+    // Replace placeholders
+    htmlTemplate = htmlTemplate.replace(
+      /{{CANDIDATE_NAME}}/g,
+      params.candidateName
+    );
+    htmlTemplate = htmlTemplate.replace(/{{JOB_TITLE}}/g, params.jobTitle);
+
+    const result = await brevo.transactionalEmails.sendTransacEmail({
+      subject: `Application Received: ${params.jobTitle} at HireIQ`,
+      htmlContent: htmlTemplate,
+      sender: { 
+        name: 'HireIQ Support', 
+        email: 'santu700141@gmail.com'
+      },
+      to: [{ 
+        email: params.to,
+        name: params.candidateName 
+      }],
+    });
+
+    return result;
+  } catch (error) {
+    console.error('Email Service Error:', error);
+    throw error;
+  }
+};

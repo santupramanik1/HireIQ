@@ -2,10 +2,23 @@ import axios from 'axios';
 import React, { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { useParams, useNavigate } from 'react-router-dom';
+import {
+  Briefcase,
+  MapPin,
+  DollarSign,
+  ArrowLeft,
+  Sparkles,
+  UploadCloud,
+  Mail,
+  Phone,
+  CheckCircle2,
+  AlertTriangle,
+  Loader2,
+  Check
+} from 'lucide-react';
 
 type SubmissionMethod = 'upload' | 'manual';
 
-// Define Job data type
 interface JobDetails {
   _id: string;
   title: string;
@@ -29,54 +42,47 @@ const currencySymbol: Record<string, string> = {
 };
 
 export default function ApplyJobPage() {
-  // Navigation for the "Go Back" button
   const navigate = useNavigate();
 
-  // Job details
   const [job, setJob] = useState<JobDetails | null>(null);
   const [isLoadingJob, setIsLoadingJob] = useState(true);
   const [jobError, setJobError] = useState<string | null>(null);
 
-  // Form & UI States
   const [method, setMethod] = useState<SubmissionMethod>('upload');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  // AI Parsing States
   const [isParsing, setIsParsing] = useState(false);
   const [parsingStep, setParsingStep] = useState(0);
 
-  // Backend Resume Parsing State
   const [resumeUrl, setResumeUrl] = useState('');
   const [rawResumeText, setRawResumeText] = useState('');
+  const [fileName, setFileName] = useState('');
 
-  // Get Jobid from URL
   const { jobId } = useParams();
 
-  // Form Data State
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
-    linkedInUrl: '', // Hidden background field
-    githubUrl: '', // Hidden background field
-    location: '', // Hidden background field
-    skills: [], // Hidden background field
+    linkedInUrl: '',
+    githubUrl: '',
+    location: '',
+    skills: [] as string[],
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Messages to cycle through during the loading state
   const parsingMessages = [
-    'Uploading document...',
-    'Scanning resume layout...',
-    'Extracting key skills...',
-    'Matching with job requirements...',
-    'Populating application form...',
+    'Uploading document securely...',
+    'Scanning resume structure & layout...',
+    'Extracting primary contact info...',
+    'Identifying key skills & expertise...',
+    'Mapping profile to job requirements...',
+    'Form auto-population complete!',
   ];
 
-  // Handle the text animation sequence
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
 
@@ -85,16 +91,16 @@ export default function ApplyJobPage() {
         setParsingStep((prev) =>
           prev < parsingMessages.length - 1 ? prev + 1 : prev
         );
-      }, 800);
+      }, 700);
     }
 
     return () => clearInterval(interval);
   }, [isParsing, parsingMessages.length]);
 
-  // Handle File Upload & Mock AI Process
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setFileName(file.name);
       setIsParsing(true);
       setParsingStep(0);
 
@@ -102,7 +108,6 @@ export default function ApplyJobPage() {
         const formDataObj = new FormData();
         formDataObj.append('resume', file);
 
-        // Send the PDF to the backend
         const { data } = await axios.post(
           `${import.meta.env.VITE_API_BASE_URL}/jobs/${jobId}/applications/extract-resume`,
           formDataObj,
@@ -116,20 +121,18 @@ export default function ApplyJobPage() {
 
         const parsedData = data.candidate_data;
 
-        // Save the raw text and URL for the final submission
         setRawResumeText(data.raw_resume_text);
         setResumeUrl(data.resumeUrl);
 
         setIsParsing(false);
 
-        // Split the name into firstname and lastname
-        const name = parsedData.candidate_name.split(' ');
-        const firstName = name[0];
-        const lastName = name[1];
+        const name = (parsedData.candidate_name || '').split(' ');
+        const firstName = name[0] || '';
+        const lastName = name.slice(1).join(' ') || '';
 
         setFormData({
-          firstName: firstName || '',
-          lastName: lastName || '',
+          firstName,
+          lastName,
           email: parsedData.email || '',
           phone: parsedData.phone || '',
           linkedInUrl: parsedData.linkedInUrl || '',
@@ -137,11 +140,13 @@ export default function ApplyJobPage() {
           location: parsedData.location || '',
           skills: parsedData.skills || [],
         });
+        toast.success('Resume parsed successfully! Form fields have been filled.');
       } catch (error) {
         setIsParsing(false);
+        setFileName('');
         console.error('Error parsing resume:', error);
+        toast.error('Failed to parse resume automatically. Please fill manually or try again.');
 
-        // Reset file input so they can try again if they want
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
         }
@@ -162,19 +167,18 @@ export default function ApplyJobPage() {
 
     const payload = {
       verifiedFormData: {
-        name: fullName, // <-- THIS IS THE FIX
+        name: fullName,
         email: formData.email,
         phone: formData.phone,
-
-        // Include your hidden fields from the AI parser
         linkedInUrl: formData.linkedInUrl,
         githubUrl: formData.githubUrl,
         location: formData.location,
         skills: formData.skills,
       },
-      rawResumeText: rawResumeText, // Make sure this state exists from your upload step
-      resumeURL: resumeUrl, // Make sure this state exists from your upload step
+      rawResumeText: rawResumeText,
+      resumeURL: resumeUrl,
     };
+
     try {
       const { data } = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/jobs/${jobId}/applications`,
@@ -185,15 +189,13 @@ export default function ApplyJobPage() {
       );
       setIsSubmitting(false);
       setIsSuccess(true);
-
-      toast.success(data.message);
+      toast.success(data.message || 'Application submitted successfully!');
     } catch (error: any) {
       setIsSubmitting(false);
-      toast.error(error.response?.data?.message || 'Application failed');
+      toast.error(error.response?.data?.message || 'Application submission failed');
     }
   };
 
-  // Fetch the job details from the backend
   useEffect(() => {
     const fetchJobDetails = async () => {
       try {
@@ -221,174 +223,207 @@ export default function ApplyJobPage() {
   }, [jobId]);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-sans text-gray-900 font-class">
+    <div className="min-h-screen bg-slate-50/50 py-10 px-4 sm:px-6 lg:px-8 font-class text-slate-800 antialiased selection:bg-indigo-100 selection:text-indigo-900">
       <div className="max-w-7xl mx-auto">
+        {/* Top Header with Back button */}
+        <div className="mb-8">
+          <button
+            onClick={() => navigate(-1)}
+            className="group flex items-center gap-2.5 text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors bg-white px-4 py-2.5 rounded-full border border-slate-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] cursor-pointer hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:border-slate-200 duration-200"
+          >
+            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+            Back to Job Board
+          </button>
+        </div>
+
         {/* === STATE 1: LOADING SKELETON === */}
         {isLoadingJob ? (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             <div className="lg:col-span-7 space-y-8 animate-pulse">
-              <div className="h-10 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-10 bg-slate-200 rounded-lg w-3/4"></div>
               <div className="flex gap-4">
-                <div className="h-6 bg-gray-200 rounded-full w-24"></div>
-                <div className="h-6 bg-gray-200 rounded-full w-24"></div>
-                <div className="h-6 bg-gray-200 rounded-full w-40"></div>
+                <div className="h-6 bg-slate-200 rounded-full w-24"></div>
+                <div className="h-6 bg-slate-200 rounded-full w-24"></div>
+                <div className="h-6 bg-slate-200 rounded-full w-40"></div>
               </div>
               <div className="space-y-4 pt-4">
-                <div className="h-4 bg-gray-200 rounded w-full"></div>
-                <div className="h-4 bg-gray-200 rounded w-full"></div>
-                <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                <div className="h-4 bg-slate-200 rounded w-full"></div>
+                <div className="h-4 bg-slate-200 rounded w-full"></div>
+                <div className="h-4 bg-slate-200 rounded w-5/6"></div>
               </div>
             </div>
-            {/* Form Skeleton to keep layout stable while loading */}
             <div className="lg:col-span-5">
-              <div className="bg-white shadow-xl border border-gray-100 rounded-2xl p-6 sm:p-8 h-96 animate-pulse flex flex-col gap-4">
-                <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
-                <div className="h-10 bg-gray-200 rounded w-full"></div>
-                <div className="h-32 bg-gray-200 rounded w-full mt-4"></div>
+              <div className="bg-white border border-slate-100 rounded-3xl p-8 h-96 animate-pulse flex flex-col gap-4 shadow-sm">
+                <div className="h-8 bg-slate-200 rounded w-1/3 mb-4"></div>
+                <div className="h-10 bg-slate-200 rounded w-full"></div>
+                <div className="h-32 bg-slate-200 rounded w-full mt-4"></div>
               </div>
             </div>
           </div>
         ) : /* === STATE 2: ERROR / JOB NOT FOUND === */
         jobError || !job ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-white shadow-sm border border-gray-100 rounded-2xl max-w-3xl mx-auto text-center px-6">
-            <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-6">
-              <svg
-                className="w-10 h-10"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                />
-              </svg>
+          <div className="flex flex-col items-center justify-center py-20 bg-white border border-slate-100 rounded-3xl max-w-3xl mx-auto text-center px-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+            <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mb-6 border border-rose-100">
+              <AlertTriangle className="w-8 h-8" />
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">
-              Job Not Found
+            <h2 className="text-3xl font-extrabold text-slate-900 mb-3">
+              Job Opportunity Unavailable
             </h2>
-            <p className="text-lg text-gray-600 mb-8 max-w-md mx-auto">
+            <p className="text-lg text-slate-600 mb-8 max-w-md mx-auto">
               {jobError ||
-                "We couldn't find the job you're looking for. It might have expired, or the URL might be incorrect."}
+                "This listing might have expired or the link is incorrect. Please contact support if you think this is an error."}
             </p>
             <button
-              onClick={() => navigate(-1)} // Or navigate('/jobs')
-              className="bg-gray-900 text-white font-medium py-2.5 px-6 rounded-lg hover:bg-gray-800 transition-colors"
+              onClick={() => navigate(-1)}
+              className="bg-indigo-600 text-white font-semibold py-3 px-8 rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-100"
             >
-              Go Back
+              Return to Listings
             </button>
           </div>
         ) : (
           /* === STATE 3: JOB RENDERED SUCCESSFULLY === */
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
             {/* Left Column: Job Details */}
-            <div className="lg:col-span-7 space-y-8">
+            <div className="lg:col-span-7 space-y-8 bg-white border border-slate-100 rounded-3xl p-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
               <div>
-                <h1 className="text-4xl font-extrabold text-gray-900 mb-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100/50 mb-4">
+                  <Briefcase className="w-3.5 h-3.5" />
+                  {job.type.charAt(0).toUpperCase() + job.type.slice(1)}
+                </span>
+                
+                <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">
                   {job.title}
                 </h1>
-                <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-gray-600 mb-6">
-                  <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
-                    {job.type.charAt(0).toUpperCase() + job.type.slice(1)}
-                  </span>
-                  <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full">
-                    {job.location}
-                  </span>
-                  <span className="flex items-center text-gray-500">
-                    {currencySymbol[job.salary?.currency] || ''}{' '}
-                    {Number(job.salary?.min).toLocaleString()} -{' '}
-                    {Number(job.salary?.max).toLocaleString()} / year
-                  </span>
+
+                {/* Job Metadata Panel */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                  <div className="flex items-center gap-3 bg-slate-50/80 border border-slate-100 p-3.5 rounded-2xl">
+                    <div className="p-2 bg-white rounded-xl border border-slate-100 text-indigo-600 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+                      <MapPin className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-slate-400">Location</p>
+                      <p className="text-sm font-bold text-slate-700">{job.location}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 bg-slate-50/80 border border-slate-100 p-3.5 rounded-2xl">
+                    <div className="p-2 bg-white rounded-xl border border-slate-100 text-emerald-600 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+                      <DollarSign className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-slate-400">Salary Package</p>
+                      <p className="text-sm font-bold text-slate-700">
+                        {currencySymbol[job.salary?.currency] || ''}
+                        {Number(job.salary?.min).toLocaleString()} -{' '}
+                        {Number(job.salary?.max).toLocaleString()} <span className="text-xs text-slate-400 font-normal">/ yr</span>
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Overview
-                </h3>
-                <p className="text-gray-600 leading-relaxed mb-6">
-                  {job.description}
-                </p>
-
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  Required Skills
-                </h3>
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {job.skills?.map((skill, idx) => (
-                    <span
-                      key={idx}
-                      className="bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm"
-                    >
-                      {skill}
-                    </span>
-                  ))}
+                {/* Overview */}
+                <div className="mb-8">
+                  <h3 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                    <span className="w-1.5 h-6 bg-indigo-600 rounded-full"></span>
+                    Role Description
+                  </h3>
+                  <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+                    {job.description}
+                  </p>
                 </div>
 
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Responsibilities
-                </h3>
-                <ul className="list-disc list-inside text-gray-600 space-y-2">
-                  {job.responsibilities?.map((resp, idx) => (
-                    <li key={idx}>{resp}</li>
-                  ))}
-                </ul>
+                {/* Skills */}
+                <div className="mb-8">
+                  <h3 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                    <span className="w-1.5 h-6 bg-indigo-600 rounded-full"></span>
+                    Required Competencies
+                  </h3>
+                  <div className="flex flex-wrap gap-2.5">
+                    {job.skills?.map((skill, idx) => (
+                      <span
+                        key={idx}
+                        className="bg-slate-50 text-slate-700 border border-slate-200/60 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all hover:border-indigo-200 hover:bg-indigo-50/30"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Responsibilities */}
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 mb-3.5 flex items-center gap-2">
+                    <span className="w-1.5 h-6 bg-indigo-600 rounded-full"></span>
+                    Key Responsibilities
+                  </h3>
+                  <ul className="space-y-3.5">
+                    {job.responsibilities?.map((resp, idx) => (
+                      <li key={idx} className="flex items-start gap-3 text-slate-600 text-sm sm:text-base">
+                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100/50 mt-0.5">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                        </span>
+                        <span className="pt-0.5">{resp}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             </div>
 
             {/* Right Column: Application Form */}
-            <div className="lg:col-span-5">
-              <div className="bg-white shadow-xl border border-gray-100 rounded-2xl p-6 sm:p-8 sticky top-8">
+            <div className="lg:col-span-5 sticky top-8">
+              <div className="bg-white border border-slate-100 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.08)] rounded-3xl p-6 sm:p-8">
                 {isSuccess ? (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg
-                        className="w-8 h-8"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="3"
-                          d="M5 13l4 4L19 7"
-                        ></path>
-                      </svg>
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-emerald-100 animate-bounce">
+                      <CheckCircle2 className="w-8 h-8" />
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                    <h3 className="text-2xl font-extrabold text-slate-900 mb-3">
                       Application Submitted!
                     </h3>
-                    <p className="text-gray-600">
-                      Our AI is currently reviewing your profile. We will email
-                      you the results shortly.
+                    <p className="text-slate-600 text-sm leading-relaxed max-w-sm mx-auto mb-6">
+                      Thank you for applying. Our AI recruiting system is currently analyzing your credentials against the role profile. Look out for an email response shortly.
                     </p>
+                    <button
+                      onClick={() => navigate(-1)}
+                      className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors bg-slate-50 px-5 py-2.5 rounded-full border border-slate-100 cursor-pointer shadow-sm"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      Back to Listings
+                    </button>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Header & Toggle at the Top */}
                     <div>
-                      <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                      <h2 className="text-2xl font-bold text-slate-900 tracking-tight mb-1">
                         Apply Now
                       </h2>
-                      <div className="flex bg-gray-100 p-1 rounded-lg mb-2">
+                      <p className="text-slate-500 text-xs mb-4">
+                        Submit your details to start the screening process.
+                      </p>
+                      
+                      {/* Method Switcher */}
+                      <div className="flex bg-slate-100/80 p-1 rounded-xl mb-4 border border-slate-200/30">
                         <button
                           type="button"
                           onClick={() => setMethod('upload')}
-                          className={`flex-1 py-2 cursor-pointer text-sm font-medium rounded-md transition-all ${
+                          className={`flex-grow flex items-center justify-center gap-1.5 py-2.5 cursor-pointer text-xs font-semibold rounded-lg transition-all duration-200 ${
                             method === 'upload'
-                              ? 'bg-white shadow text-blue-600'
-                              : 'text-gray-500 hover:text-gray-700'
+                              ? 'bg-white shadow-sm text-indigo-600 border border-slate-200/20'
+                              : 'text-slate-500 hover:text-slate-800'
                           }`}
                         >
-                          ✨ AI Auto-Fill Resume
+                          <Sparkles className="w-3.5 h-3.5" />
+                          AI Auto-Fill
                         </button>
                         <button
                           type="button"
                           onClick={() => setMethod('manual')}
-                          className={`flex-1 py-2 text-sm font-medium cursor-pointer rounded-md transition-all ${
+                          className={`flex-grow flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold cursor-pointer rounded-lg transition-all duration-200 ${
                             method === 'manual'
-                              ? 'bg-white shadow text-blue-600'
-                              : 'text-gray-500 hover:text-gray-700'
+                              ? 'bg-white shadow-sm text-indigo-600 border border-slate-200/20'
+                              : 'text-slate-500 hover:text-slate-800'
                           }`}
                         >
                           Fill Manually
@@ -398,30 +433,32 @@ export default function ApplyJobPage() {
 
                     {/* Conditional UI: Upload Dropzone OR Parsing Animation */}
                     {method === 'upload' && (
-                      <div className="mb-6 h-40">
+                      <div className="mb-4">
                         {isParsing ? (
-                          <div className="h-full w-full border-2 border-blue-400 bg-blue-50 rounded-lg flex flex-col items-center justify-center p-6 shadow-inner">
-                            <div className="relative mb-4">
-                              <div className="w-12 h-12 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin"></div>
-                              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-blue-500 rounded-full animate-pulse"></div>
+                          <div className="h-44 w-full border border-indigo-200 bg-indigo-50/30 rounded-2xl flex flex-col items-center justify-center p-6 shadow-inner relative overflow-hidden">
+                            {/* Scanning Laser Line Animation Effect */}
+                            <div className="absolute top-0 left-0 right-0 h-1 bg-indigo-500/80 animate-pulse"></div>
+                            
+                            <div className="mb-3">
+                              <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
                             </div>
-                            <p className="text-sm font-bold text-blue-800 transition-opacity duration-300">
+                            <p className="text-sm font-bold text-indigo-900 animate-pulse text-center">
                               {parsingMessages[parsingStep]}
+                            </p>
+                            <p className="text-xs text-indigo-500/80 mt-1.5">
+                              Extracting info from {fileName}
                             </p>
                           </div>
                         ) : (
-                          <label className="h-full w-full border-2 border-dashed border-blue-300 bg-blue-50/50 rounded-lg flex flex-col items-center justify-center p-6 hover:bg-blue-50 transition-colors cursor-pointer group">
-                            <span
-                              className="material-symbols-outlined  text-blue-400 group-hover:text-blue-600 mb-3 transition-transform group-hover:-translate-y-1"
-                              style={{ fontSize: '40px' }}
-                            >
-                              cloud_upload
-                            </span>
-                            <p className="text-sm font-semibold text-blue-900">
-                              Upload resume to auto-fill
+                          <label className="group relative h-40 w-full border border-dashed border-slate-200 bg-slate-50/50 hover:bg-indigo-50/10 hover:border-indigo-300 rounded-2xl flex flex-col items-center justify-center p-6 transition-all cursor-pointer shadow-sm hover:shadow-md">
+                            <div className="p-3 bg-white rounded-xl border border-slate-100 text-slate-400 group-hover:text-indigo-600 shadow-sm transition-colors duration-200">
+                              <UploadCloud className="w-6 h-6" />
+                            </div>
+                            <p className="text-sm font-bold text-slate-700 mt-3 group-hover:text-indigo-700">
+                              {fileName ? fileName : 'Upload Resume / CV'}
                             </p>
-                            <p className="text-xs text-blue-600/70 mt-1">
-                              PDF only (MAX. 5MB)
+                            <p className="text-xs text-slate-400 mt-1">
+                              PDF only (Max 5MB)
                             </p>
                             <input
                               type="file"
@@ -437,15 +474,13 @@ export default function ApplyJobPage() {
 
                     {/* Shared Form Fields */}
                     <div
-                      className={`space-y-4 transition-opacity duration-500 ${
-                        isParsing
-                          ? 'opacity-40 pointer-events-none'
-                          : 'opacity-100'
+                      className={`space-y-4 transition-opacity duration-300 ${
+                        isParsing ? 'opacity-30 pointer-events-none' : 'opacity-100'
                       }`}
                     >
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-xs font-semibold text-slate-500 mb-1">
                             First Name
                           </label>
                           <input
@@ -454,12 +489,12 @@ export default function ApplyJobPage() {
                             name="firstName"
                             value={formData.firstName}
                             onChange={handleInputChange}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+                            className="w-full px-4 py-2.5 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-slate-50/40 text-sm font-medium"
                             placeholder="Jane"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-xs font-semibold text-slate-500 mb-1">
                             Last Name
                           </label>
                           <input
@@ -468,55 +503,133 @@ export default function ApplyJobPage() {
                             name="lastName"
                             value={formData.lastName}
                             onChange={handleInputChange}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+                            className="w-full px-4 py-2.5 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-slate-50/40 text-sm font-medium"
                             placeholder="Doe"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">
                           Email Address
                         </label>
-                        <input
-                          required
-                          type="email"
-                          name="email"
-                          value={formData.email}
-                          onChange={handleInputChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
-                          placeholder="jane@example.com"
-                        />
+                        <div className="relative">
+                          <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                            <Mail className="w-4 h-4" />
+                          </span>
+                          <input
+                            required
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            className="w-full pl-9 pr-4 py-2.5 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-slate-50/40 text-sm font-medium"
+                            placeholder="jane@example.com"
+                          />
+                        </div>
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">
                           Phone Number
                         </label>
-                        <input
-                          required
-                          type="tel"
-                          name="phone"
-                          value={formData.phone}
-                          onChange={handleInputChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
-                          placeholder="+1 (555) 000-0000"
-                        />
+                        <div className="relative">
+                          <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                            <Phone className="w-4 h-4" />
+                          </span>
+                          <input
+                            required
+                            type="tel"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleInputChange}
+                            className="w-full pl-9 pr-4 py-2.5 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-slate-50/40 text-sm font-medium"
+                            placeholder="+1 (555) 000-0000"
+                          />
+                        </div>
                       </div>
+
+                      {/* Display extracted data badge details when AI is done parsing */}
+                      {method === 'upload' && !isParsing && (formData.skills.length > 0 || formData.linkedInUrl || formData.githubUrl || formData.location) && (
+                        <div className="bg-indigo-50/20 border border-indigo-100/50 rounded-2xl p-4 mt-4 space-y-3.5">
+                          <p className="text-xs font-bold text-indigo-900 flex items-center gap-1.5">
+                            <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+                            Extracted Profile Details
+                          </p>
+
+                          {formData.location && (
+                            <p className="text-xs text-slate-600 flex items-center gap-1.5">
+                              <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                              <strong className="text-slate-700">Location:</strong> {formData.location}
+                            </p>
+                          )}
+
+                          {(formData.linkedInUrl || formData.githubUrl) && (
+                            <div className="flex flex-wrap gap-3">
+                              {formData.linkedInUrl && (
+                                <a
+                                  href={formData.linkedInUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center gap-1 font-semibold"
+                                >
+                                  <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                                  </svg>
+                                  LinkedIn Profile
+                                </a>
+                              )}
+                              {formData.githubUrl && (
+                                <a
+                                  href={formData.githubUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs text-slate-700 hover:text-slate-900 flex items-center gap-1 font-semibold"
+                                >
+                                  <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                                  </svg>
+                                  GitHub Profile
+                                </a>
+                              )}
+                            </div>
+                          )}
+
+                          {formData.skills.length > 0 && (
+                            <div>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Extracted Skills</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {formData.skills.slice(0, 8).map((skill, idx) => (
+                                  <span key={idx} className="bg-white border border-slate-100 text-slate-600 px-2 py-0.5 rounded-md text-[10px] font-semibold">
+                                    {skill}
+                                  </span>
+                                ))}
+                                {formData.skills.length > 8 && (
+                                  <span className="text-[10px] text-slate-400 font-semibold pt-0.5">
+                                    +{formData.skills.length - 8} more
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     {/* Manual Mode Specific Fields */}
                     {method === 'manual' && (
                       <div className="pt-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-xs font-semibold text-slate-500 mb-2.5">
                           Attach Resume (Required)
                         </label>
-                        <input
-                          required
-                          type="file"
-                          accept=".pdf"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all outline-none"
-                        />
+                        <div className="relative">
+                          <input
+                            required
+                            type="file"
+                            accept=".pdf"
+                            className="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100/80 transition-all outline-none border border-slate-200/80 rounded-xl bg-slate-50/20"
+                          />
+                        </div>
                       </div>
                     )}
 
@@ -524,15 +637,13 @@ export default function ApplyJobPage() {
                     <button
                       type="submit"
                       disabled={isSubmitting || isParsing}
-                      className="w-full bg-blue-600 cursor-pointer text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors flex justify-center items-center disabled:bg-blue-400 mt-6 disabled:cursor-not-allowed"
+                      className="w-full bg-indigo-600 cursor-pointer text-white font-semibold py-3 px-4 rounded-xl hover:bg-indigo-700 active:bg-indigo-800 transition-all flex justify-center items-center shadow-lg shadow-indigo-100 hover:shadow-indigo-200 disabled:bg-indigo-400 mt-6 disabled:cursor-not-allowed disabled:shadow-none"
                     >
                       {isSubmitting ? (
-                        <>
-                          <>
-                            <div className="animate-spin -ml-1 mr-3 h-5 w-5 border-2 border-white/30 border-t-white rounded-full"></div>
-                            Sending Application...
-                          </>
-                        </>
+                        <span className="flex items-center gap-2">
+                          <Loader2 className="animate-spin w-4 h-4" />
+                          Submitting application...
+                        </span>
                       ) : (
                         'Submit Application'
                       )}
@@ -547,3 +658,4 @@ export default function ApplyJobPage() {
     </div>
   );
 }
+
