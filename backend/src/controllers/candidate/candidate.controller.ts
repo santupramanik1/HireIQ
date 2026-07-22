@@ -11,14 +11,75 @@ import { Interview } from '../../models/interview/interview.model.js';
  */
 export const getAllAppliedCandidates = async (req: Request, res: Response) => {
   try {
-    const applications = await Application.find()
-      .populate('candidateID', 'name email')
-      .populate('jobID', 'title')
-      .lean();
+    const pipeline = [
+      {
+        $lookup: {
+          from: 'candidates',
+          localField: 'candidateID',
+          foreignField: '_id',
+          as: 'candidateDetails',
+        },
+      },
+      {
+        $unwind: { path: '$candidateDetails', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $lookup: {
+          from: 'jobs',
+          localField: 'jobID',
+          foreignField: '_id',
+          as: 'jobDetails',
+        },
+      },
+      {
+        $unwind: { path: '$jobDetails', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $lookup: {
+          from: 'resumeanalyses',
+          localField: '_id',
+          foreignField: 'applicationId',
+          as: 'analysisDetails',
+        },
+      },
+      {
+        $unwind: { path: '$analysisDetails', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $lookup: {
+          from: 'interviews',
+          localField: '_id',
+          foreignField: 'applicationId',
+          as: 'interviewDetails',
+        },
+      },
+      {
+        $unwind: { path: '$interviewDetails', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $project: {
+          applicationId: '$_id',
+          jobId: {
+            _id: '$jobDetails._id',
+            title: '$jobDetails.title'
+          },
+          status: '$status',
+          finalScore: '$finalScore',
+          candidateId: '$candidateDetails._id',
+          candidateName: '$candidateDetails.name',
+          candidateEmail: '$candidateDetails.email',
+          appliedAt: '$createdAt',
+          matchScore: { $ifNull: ['$analysisDetails.matchScore', 0] },
+          interviewScore: { $ifNull: ['$interviewDetails.overallScore', 0] }
+        }
+      }
+    ];
+
+    const formattedData = await Application.aggregate(pipeline);
 
     // Handle the case where no applications exist in the system yet
-    if (!applications || applications.length === 0) {
-      res.status(404).json({
+    if (!formattedData || formattedData.length === 0) {
+      res.status(200).json({
         success: true,
         message: 'No applications found in the system.',
         data: [],
@@ -26,40 +87,13 @@ export const getAllAppliedCandidates = async (req: Request, res: Response) => {
       return;
     }
 
-    const formattedData = applications.map((app) => {
-      const candidate = app.candidateID as unknown as {
-        _id: string;
-        name: string;
-        email: string;
-      };
-      return {
-        applicationId: app._id,
-        jobId: app.jobID, // Identifies which job this specific application is for
-        status: app.status,
-        finalScore: app.finalScore,
-        candidateId: candidate?._id,
-        candidateName: candidate?.name || 'Unknown',
-        candidateEmail: candidate?.email || 'Unknown',
-        appliedAt: app.createdAt,
-      };
-    });
-
     return res.status(200).json({
       success: true,
       count: formattedData.length,
       data: formattedData,
     });
   } catch (error) {
-    // Catch Mongoose-specific errors
-    if (error instanceof mongoose.Error) {
-      res.status(500).json({
-        success: false,
-        message: 'A database error occurred while fetching candidates.',
-      });
-      return;
-    }
-
-    // Catch all other unexpected server errors
+    console.error('Error fetching candidate applications:', error);
     res.status(500).json({
       success: false,
       message: 'An unexpected server error occurred.',
@@ -264,3 +298,85 @@ export const getTopMatchedCandidates = async (
     });
   }
 };
+
+/**
+ * @desc    Update a candidate's application status
+ * @route   PUT /api/applications/candidates/:id/status
+ * @access  Private/Admin
+ */
+export const updateApplicationStatus = async (req: Request<{ id: string }>, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      res.status(400).json({ success: false, message: 'Invalid Application ID.' });
+      return;
+    }
+
+    const validStatuses = ['applied', 'screening', 'interviewing', 'offered', 'rejected'];
+    if (!status || !validStatuses.includes(status)) {
+      res.status(400).json({ success: false, message: 'Invalid status value.' });
+      return;
+    }
+
+    const application = await Application.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
+
+    if (!application) {
+      res.status(404).json({ success: false, message: 'Application not found.' });
+      return;
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Status updated successfully.',
+      data: application,
+    });
+  } catch (error) {
+    console.error('Error updating application status:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+/**
+ * @desc    Delete a candidate application and related analysis/interviews
+ * @route   DELETE /api/applications/candidates/:id
+ * @access  Private/Admin
+ */
+export const deleteCandidateApplication = async (req: Request<{ id: string }>, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      res.status(400).json({ success: false, message: 'Invalid Application ID.' });
+      return;
+    }
+
+    // 1. Delete the Application
+    const application = await Application.findByIdAndDelete(id);
+
+    if (!application) {
+      res.status(404).json({ success: false, message: 'Application not found.' });
+      return;
+    }
+
+    // 2. Delete related ResumeAnalysis
+    await ResumeAnalysis.deleteMany({ applicationId: id });
+
+    // 3. Delete related Interview
+    await Interview.deleteMany({ applicationId: id });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Candidate application deleted successfully.',
+    });
+  } catch (error) {
+    console.error('Error deleting candidate application:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+

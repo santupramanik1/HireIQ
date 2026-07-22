@@ -126,21 +126,25 @@ export default function ApplyJobPage() {
 
         setIsParsing(false);
 
-        const name = (parsedData.candidate_name || '').split(' ');
-        const firstName = name[0] || '';
-        const lastName = name.slice(1).join(' ') || '';
+        if (method === 'upload') {
+          const name = (parsedData.candidate_name || '').split(' ');
+          const firstName = name[0] || '';
+          const lastName = name.slice(1).join(' ') || '';
 
-        setFormData({
-          firstName,
-          lastName,
-          email: parsedData.email || '',
-          phone: parsedData.phone || '',
-          linkedInUrl: parsedData.linkedInUrl || '',
-          githubUrl: parsedData.githubUrl || '',
-          location: parsedData.location || '',
-          skills: parsedData.skills || [],
-        });
-        toast.success('Resume parsed successfully! Form fields have been filled.');
+          setFormData({
+            firstName,
+            lastName,
+            email: parsedData.email || '',
+            phone: parsedData.phone || '',
+            linkedInUrl: parsedData.linkedInUrl || '',
+            githubUrl: parsedData.githubUrl || '',
+            location: parsedData.location || '',
+            skills: parsedData.skills || [],
+          });
+          toast.success('Resume parsed successfully! Form fields have been filled.');
+        } else {
+          toast.success('Resume uploaded successfully!');
+        }
       } catch (error) {
         setIsParsing(false);
         setFileName('');
@@ -223,19 +227,8 @@ export default function ApplyJobPage() {
   }, [jobId]);
 
   return (
-    <div className="min-h-screen bg-slate-50/50 py-10 px-4 sm:px-6 lg:px-8 font-class text-slate-800 antialiased selection:bg-indigo-100 selection:text-indigo-900">
+    <div className="min-h-screen bg-slate-50/50 py-10 px-4 sm:px-6 lg:px-8 font-class text-slate-800 antialiased selection:bg-indigo-100 selection:text-indigo-900 page-reveal">
       <div className="max-w-7xl mx-auto">
-        {/* Top Header with Back button */}
-        <div className="mb-8">
-          <button
-            onClick={() => navigate(-1)}
-            className="group flex items-center gap-2.5 text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors bg-white px-4 py-2.5 rounded-full border border-slate-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] cursor-pointer hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:border-slate-200 duration-200"
-          >
-            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-            Back to Job Board
-          </button>
-        </div>
-
         {/* === STATE 1: LOADING SKELETON === */}
         {isLoadingJob ? (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
@@ -385,13 +378,6 @@ export default function ApplyJobPage() {
                     <p className="text-slate-600 text-sm leading-relaxed max-w-sm mx-auto mb-6">
                       Thank you for applying. Our AI recruiting system is currently analyzing your credentials against the role profile. Look out for an email response shortly.
                     </p>
-                    <button
-                      onClick={() => navigate(-1)}
-                      className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors bg-slate-50 px-5 py-2.5 rounded-full border border-slate-100 cursor-pointer shadow-sm"
-                    >
-                      <ArrowLeft className="w-4 h-4" />
-                      Back to Listings
-                    </button>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-6">
@@ -481,7 +467,7 @@ export default function ApplyJobPage() {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-semibold text-slate-500 mb-1">
-                            First Name
+                            First Name <span className="text-rose-500">*</span>
                           </label>
                           <input
                             required
@@ -495,7 +481,7 @@ export default function ApplyJobPage() {
                         </div>
                         <div>
                           <label className="block text-xs font-semibold text-slate-500 mb-1">
-                            Last Name
+                            Last Name <span className="text-rose-500">*</span>
                           </label>
                           <input
                             required
@@ -511,7 +497,7 @@ export default function ApplyJobPage() {
 
                       <div>
                         <label className="block text-xs font-semibold text-slate-500 mb-1">
-                          Email Address
+                          Email Address <span className="text-rose-500">*</span>
                         </label>
                         <div className="relative">
                           <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
@@ -531,7 +517,7 @@ export default function ApplyJobPage() {
 
                       <div>
                         <label className="block text-xs font-semibold text-slate-500 mb-1">
-                          Phone Number
+                          Phone Number <span className="text-rose-500">*</span>
                         </label>
                         <div className="relative">
                           <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
@@ -548,6 +534,72 @@ export default function ApplyJobPage() {
                           />
                         </div>
                       </div>
+
+                      {method === 'manual' && (
+                        <>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 mb-1">
+                              Location
+                            </label>
+                            <input
+                              type="text"
+                              name="location"
+                              value={formData.location}
+                              onChange={handleInputChange}
+                              className="w-full px-4 py-2.5 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-slate-50/40 text-sm font-medium"
+                              placeholder="San Francisco, CA"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 mb-1">
+                              LinkedIn Profile URL
+                            </label>
+                            <input
+                              type="url"
+                              name="linkedInUrl"
+                              value={formData.linkedInUrl}
+                              onChange={handleInputChange}
+                              className="w-full px-4 py-2.5 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-slate-50/40 text-sm font-medium"
+                              placeholder="https://linkedin.com/in/username"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 mb-1">
+                              GitHub Profile URL
+                            </label>
+                            <input
+                              type="url"
+                              name="githubUrl"
+                              value={formData.githubUrl}
+                              onChange={handleInputChange}
+                              className="w-full px-4 py-2.5 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-slate-50/40 text-sm font-medium"
+                              placeholder="https://github.com/username"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 mb-1">
+                              Skills (Comma-separated)
+                            </label>
+                            <input
+                              type="text"
+                              name="skills"
+                              value={formData.skills.join(', ')}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                setFormData(prev => ({
+                                  ...prev,
+                                  skills: value.split(',').map(s => s.trim()).filter(Boolean)
+                                }));
+                              }}
+                              className="w-full px-4 py-2.5 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-slate-50/40 text-sm font-medium"
+                              placeholder="React, Node.js, MongoDB"
+                            />
+                          </div>
+                        </>
+                      )}
 
                       {/* Display extracted data badge details when AI is done parsing */}
                       {method === 'upload' && !isParsing && (formData.skills.length > 0 || formData.linkedInUrl || formData.githubUrl || formData.location) && (
@@ -620,13 +672,14 @@ export default function ApplyJobPage() {
                     {method === 'manual' && (
                       <div className="pt-2">
                         <label className="block text-xs font-semibold text-slate-500 mb-2.5">
-                          Attach Resume (Required)
+                          Attach Resume <span className="text-rose-500">*</span>
                         </label>
                         <div className="relative">
                           <input
                             required
                             type="file"
                             accept=".pdf"
+                            onChange={handleFileUpload}
                             className="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100/80 transition-all outline-none border border-slate-200/80 rounded-xl bg-slate-50/20"
                           />
                         </div>

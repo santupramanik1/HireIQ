@@ -1,6 +1,7 @@
 'use client';
 
 import { Play, ArrowRight, PhoneCall, CheckCircle2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 function VoiceWaveVisual() {
   const bars = [
@@ -62,7 +63,7 @@ function VoiceWaveVisual() {
             <CheckCircle2 size={16} className="text-[#a78bfa]" />
             <span className="text-white/70 text-sm">Screening Score</span>
           </div>
-          <div className="font-['Syne',sans-serif] font-extrabold text-lg text-[#a78bfa]">
+          <div className="font-class font-extrabold text-lg text-[#a78bfa]">
             87 / 100
           </div>
         </div>
@@ -71,7 +72,13 @@ function VoiceWaveVisual() {
   );
 }
 
-export default function HeroSection() {
+interface HeroSectionProps {
+  setLoginModelOpen?: (open: boolean) => void;
+  onWatchDemo?: () => void;
+}
+
+export default function HeroSection({ setLoginModelOpen, onWatchDemo }: HeroSectionProps) {
+  const navigate = useNavigate();
   return (
     <section className="relative min-h-screen flex items-center pt-32 pb-20 overflow-hidden">
       <div className="absolute -top-32 -left-48 w-[600px] h-[600px] rounded-full bg-[#6c63ff]/15 blur-[100px] pointer-events-none" />
@@ -86,7 +93,7 @@ export default function HeroSection() {
               AI-Powered Recruiting
             </span>
           </div>
-          <h1 className="font-['Syne',sans-serif] text-[clamp(2.4rem,5vw,4rem)] font-extrabold leading-[1.1] tracking-tight text-white mb-6">
+          <h1 className="font-class text-[clamp(2.4rem,5vw,4rem)] font-extrabold leading-[1.1] tracking-tight text-white mb-6">
             Automate Candidate{' '}
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#6c63ff] to-[#a78bfa]">
               Screening
@@ -99,10 +106,16 @@ export default function HeroSection() {
             performers.
           </p>
           <div className="flex flex-col sm:flex-row items-center gap-4 mb-12">
-            <button className="w-full sm:w-auto px-8 py-4 bg-[#6c63ff] hover:bg-[#5b54e6] text-white rounded-full font-semibold transition-all flex items-center justify-center gap-2">
+            <button 
+              onClick={() => navigate('/dashboard')}
+              className="w-full sm:w-auto px-8 py-4 bg-[#6c63ff] hover:bg-[#5b54e6] text-white rounded-full font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
               Start Free Trial <ArrowRight size={18} />
             </button>
-            <button className="w-full sm:w-auto px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-full font-medium transition-all flex items-center justify-center gap-3">
+            <button 
+              onClick={onWatchDemo}
+              className="w-full sm:w-auto px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-full font-medium transition-all flex items-center justify-center gap-3 cursor-pointer"
+            >
               <div className="w-7 h-7 rounded-full bg-[#6c63ff]/30 flex items-center justify-center">
                 <Play size={10} className="fill-white text-white ml-0.5" />
               </div>

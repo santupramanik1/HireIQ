@@ -4,16 +4,23 @@ import { Mic } from 'lucide-react';
 
 export default function Footer() {
   const footerLinks = {
-    Product: ['Features', 'How It Works', 'Pricing', 'Changelog', 'Roadmap'],
-    Company: ['About', 'Blog', 'Careers', 'Press', 'Contact'],
-    Resources: [
-      'Documentation',
-      'API Reference',
-      'Status',
-      'Support',
-      'Community',
+    Features: [
+      { label: 'AI Voice Screening', href: '#features' },
+      { label: 'Resume Match Analysis', href: '#features' },
+      { label: 'Interactive Scoring', href: '#features' },
     ],
-    Legal: ['Privacy Policy', 'Terms of Service', 'Security', 'GDPR'],
+    Workflow: [
+      { label: 'Job Creation', href: '#how-it-works' },
+      { label: 'Automated Interviews', href: '#how-it-works' },
+      { label: 'Recruiter Dashboard', href: '#how-it-works' },
+    ],
+    Recruiters: [
+      { label: 'Access Dashboard', href: '/dashboard' },
+      { label: 'Manage Roles', href: '/dashboard/jobs' },
+    ],
+    Candidates: [
+      { label: 'Verify Screening Code', href: '/interview/verify' },
+    ],
   };
 
   return (
@@ -25,7 +32,7 @@ export default function Footer() {
               <div className="w-9 h-9 rounded-xl bg-linear-to-br from-[#6c63ff] to-[#9b59b6] flex items-center justify-center">
                 <Mic size={18} className="text-white" />
               </div>
-              <span className="font-['Syne',sans-serif] font-extrabold text-[1.1rem] text-white tracking-tight">
+              <span className="font-class font-extrabold text-[1.1rem] text-white tracking-tight">
                 HireIQ<span className="text-[#a78bfa]">AI</span>
               </span>
             </a>
@@ -114,12 +121,12 @@ export default function Footer() {
               </h4>
               <ul className="flex flex-col gap-3">
                 {links.map((link) => (
-                  <li key={link}>
+                  <li key={link.label}>
                     <a
-                      href="#"
+                      href={link.href}
                       className="text-white/40 hover:text-white/80 text-sm transition-colors duration-200"
                     >
-                      {link}
+                      {link.label}
                     </a>
                   </li>
                 ))}

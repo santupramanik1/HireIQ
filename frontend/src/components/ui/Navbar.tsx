@@ -5,10 +5,17 @@ import LoginModel from '../auth/LoginModel';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-export default function Navbar() {
+interface NavbarProps {
+  loginModelOpen?: boolean;
+  setLoginModelOpen?: (open: boolean) => void;
+}
+
+export default function Navbar({ loginModelOpen: propLoginOpen, setLoginModelOpen: propSetLoginOpen }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [loginModelOpen, setLoginModelOpen] = useState(false);
+  const [localLoginOpen, setLocalLoginOpen] = useState(false);
+  const loginModelOpen = propLoginOpen !== undefined ? propLoginOpen : localLoginOpen;
+  const setLoginModelOpen = propSetLoginOpen !== undefined ? propSetLoginOpen : setLocalLoginOpen;
 
   // For Outside click close the popup model
   const desktopLoginRef = useRef<HTMLDivElement>(null);
@@ -52,7 +59,6 @@ export default function Navbar() {
   const navLinks = [
     { label: 'Features', href: '#features' },
     { label: 'How It Works', href: '#how-it-works' },
-    { label: 'Pricing', href: '#pricing' },
   ];
 
   // Check user logged-in state
@@ -73,7 +79,7 @@ export default function Navbar() {
           <div className="w-9 h-9 rounded-xl bg-linear-to-br from-[#6c63ff] to-[#9b59b6] flex items-center justify-center shadow-[0_0_16px_rgba(108,99,255,0.5)]">
             <Mic size={18} className="text-white" />
           </div>
-          <span className="font-['Syne',sans-serif] font-extrabold text-[1.1rem] text-white tracking-tight">
+          <span className="font-class font-extrabold text-[1.1rem] text-white tracking-tight">
             HireIQ<span className="text-[#a78bfa]">AI</span>
           </span>
         </a>

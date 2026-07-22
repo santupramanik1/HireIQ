@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import { EmailIcon } from '../shared/components/EmailIcon';
 import ContactIcon from '../shared/components/ContactIcon';
 import { LocationIcon } from '../shared/components/LocationIcon';
@@ -39,6 +40,24 @@ interface CandidateProfile {
     };
   };
 }
+
+const getStatusBadgeClass = (status: string) => {
+  switch (status?.toLowerCase()) {
+    case 'applied':
+      return 'bg-blue-50 text-blue-700 border-blue-200';
+    case 'screening':
+      return 'bg-amber-50 text-amber-700 border-amber-200';
+    case 'interviewing':
+      return 'bg-purple-50 text-purple-700 border-purple-200';
+    case 'offered':
+      return 'bg-green-50 text-green-700 border-green-200';
+    case 'rejected':
+      return 'bg-red-50 text-red-700 border-red-200';
+    default:
+      return 'bg-gray-50 text-gray-700 border-gray-200';
+  }
+};
+
 export default function CandidateInfoPage() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -46,6 +65,31 @@ export default function CandidateInfoPage() {
   const [candidate, setCandidate] = useState<CandidateProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+
+  const handleStatusChange = async (newStatus: string) => {
+    if (!candidate) return;
+    setIsUpdatingStatus(true);
+    try {
+      const response = await axios.put(
+        `${import.meta.env.VITE_API_BASE_URL}/applications/candidates/${id}/status`,
+        { status: newStatus },
+        { withCredentials: true }
+      );
+      if (response.data.success) {
+        setCandidate({
+          ...candidate,
+          status: newStatus
+        });
+        toast.success(`Status updated to ${newStatus}`);
+      }
+    } catch (err: any) {
+      console.error('Failed to update status:', err);
+      toast.error(err.response?.data?.message || 'Failed to update status.');
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
 
   // Fetch Real Data
   useEffect(() => {
@@ -83,7 +127,7 @@ export default function CandidateInfoPage() {
     return <div className="p-8 text-center text-red-500 mt-10">{error}</div>;
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-4 md:p-6 lg:p-8">
+    <div className="w-full max-w-6xl mx-auto p-4 md:p-6 lg:p-8 page-reveal">
       {/* Back Button */}
       <button
         onClick={() => navigate(-1)}
@@ -107,10 +151,25 @@ export default function CandidateInfoPage() {
               {candidate.role} <span className="mx-1">@</span>{' '}
               {candidate.company}
             </p>
-            <div className="flex flex-wrap gap-2">
-              <span className="px-3 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 rounded-full capitalize border border-yellow-200">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className={`px-3 py-1 text-xs font-semibold rounded-full capitalize border shadow-sm transition-all duration-300 ${getStatusBadgeClass(candidate.status)}`}>
                 {candidate.status}
               </span>
+              
+              <div className="relative inline-flex items-center">
+                <select
+                  value={candidate.status}
+                  onChange={(e) => handleStatusChange(e.target.value)}
+                  disabled={isUpdatingStatus}
+                  className="bg-white border border-gray-200 text-gray-700 text-xs font-medium rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-all hover:bg-gray-50 outline-none"
+                >
+                  <option value="applied">Applied</option>
+                  <option value="screening">Screening</option>
+                  <option value="interviewing">Interviewing</option>
+                  <option value="offered">Offered</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>

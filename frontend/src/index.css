@@ -2,6 +2,10 @@
 
 @import 'tailwindcss';
 
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
 .font-class {
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
@@ -18,4 +22,30 @@
 
 .button-bg-color {
   background-color: #4647d3;
+}
+
+@keyframes pageReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-reveal {
+  animation: pageReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.9s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
 }

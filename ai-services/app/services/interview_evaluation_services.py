@@ -7,6 +7,7 @@ from models.interview_model import InterviewSetup
 from schema.interview_evaluation_schema import InterviewScorecard
 from models.session_model import InterviewSession
 from langchain_core.output_parsers import PydanticOutputParser
+from config.db_config import get_db
 
 
 async def evaluate_and_save_interview(session_id: PydanticObjectId, transcript_array: list) -> dict:
@@ -83,6 +84,14 @@ async def evaluate_and_save_interview(session_id: PydanticObjectId, transcript_a
         interview.transcript = [{"role": m.get("role"), "text": m.get("text")} for m in transcript_array]
         
         await interview.save()
+
+        # Update associated Application status to 'screening'
+        db = get_db()
+        if db is not None and interview.applicationId:
+            await db["applications"].update_one(
+                {"_id": interview.applicationId},
+                {"$set": {"status": "screening"}}
+            )
 
         # 8. Lock the temporary session so the link can't be used again
         session.is_completed = True

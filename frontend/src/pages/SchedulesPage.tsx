@@ -726,10 +726,10 @@ export default function SchedulesPage() {
             dateCompleted: formatDate(item.updatedAt),
             initials: getInitials(item.candidateName),
             colorClass: getColorClass(item.candidateName),
-            score: item.overallScore || 0,
-            communicationScore: item.communicationScore || 0,
-            technicalScore: item.technicalScore || 0,
-            confidenceScore: item.confidenceScore || 0,
+            score: typeof item.overallScore === 'number' ? (item.overallScore > 10 ? item.overallScore / 10 : item.overallScore) : 0,
+            communicationScore: typeof item.communicationScore === 'number' ? (item.communicationScore > 10 ? item.communicationScore / 10 : item.communicationScore) : 0,
+            technicalScore: typeof item.technicalScore === 'number' ? (item.technicalScore > 10 ? item.technicalScore / 10 : item.technicalScore) : 0,
+            confidenceScore: typeof item.confidenceScore === 'number' ? (item.confidenceScore > 10 ? item.confidenceScore / 10 : item.confidenceScore) : 0,
             strengths: item.strengths || [],
             weaknesses: item.weaknesses || [],
             detailedFeedback: item.detailedFeedback || 'No feedback provided.',
@@ -779,7 +779,7 @@ export default function SchedulesPage() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-slate-50/50 p-4 sm:p-6 lg:p-8 font-class">
+    <div className="min-h-screen bg-slate-50/50 p-4 sm:p-6 lg:p-8 font-class page-reveal">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* --- HEADER --- */}
         <div>

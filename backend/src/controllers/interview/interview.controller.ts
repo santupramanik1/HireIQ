@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import { Interview } from '../../models/interview/interview.model.js';
+import { Application } from '../../models/application/application.model.js';
 import { sendInterviewInviteEmail } from '../email/email.controller.js';
 import mongoose from 'mongoose';
 import { redisClient } from '../../config/redis.js';
@@ -98,6 +99,11 @@ export const inviteCandidateToInterview = async (
       status: 'invited',
     });
     await newInterview.save();
+
+    // Update Application Status to 'interviewing'
+    if (applicationId) {
+      await Application.findByIdAndUpdate(applicationId, { status: 'interviewing' });
+    }
 
     // ==========================================
     // 2. THE FIX: Create the AI Session for Python

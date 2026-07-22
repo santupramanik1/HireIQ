@@ -17,54 +17,41 @@ export default function FeaturesSection() {
       icon: Mic2,
       title: 'AI Voice Screening',
       description:
-        'Human-sounding voice agents conduct structured interviews...',
+        'Human-like voice agents conduct interactive screening calls dynamically.',
       color: '#6c63ff',
       badge: 'Core',
     },
     {
-      icon: FileSpreadsheet,
-      title: 'Candidate Import',
-      description: 'CSV upload, ATS integrations, or manual entry...',
-      color: '#a78bfa',
-    },
-    {
-      icon: Calendar,
-      title: 'Auto Scheduling',
-      description:
-        'Top-scored candidates are auto-scheduled for next rounds...',
-      color: '#34d399',
-    },
-    {
       icon: FileText,
-      title: 'Transcripts & Scoring',
-      description: 'Full call transcripts with AI-generated scores...',
+      title: 'Resume Match Analysis',
+      description: 'Auto-scans PDF resumes to match candidate skills with JDs.',
+      color: '#a78bfa',
+      badge: 'Resume',
+    },
+    {
+      icon: BarChart3,
+      title: 'Interactive Scoring',
+      description: 'Breakdown of communication, technical depth, and confidence scores.',
       color: '#f59e0b',
       badge: 'Popular',
     },
     {
-      icon: Globe2,
-      title: 'Multi-language Support',
-      description: 'Conduct interviews in 30+ languages...',
+      icon: FileSpreadsheet,
+      title: 'Candidate Management',
+      description: 'Clean ATS dashboard to track status, invite, and delete applicants.',
       color: '#60a5fa',
     },
     {
-      icon: BarChart3,
-      title: 'Analytics Dashboard',
-      description: 'Track pipeline velocity, drop-off rates...',
-      color: '#f472b6',
+      icon: Calendar,
+      title: 'Auto Invite Templates',
+      description: 'Generate magic invitation link emails for voice screening.',
+      color: '#34d399',
     },
     {
       icon: Zap,
-      title: 'Instant Notifications',
-      description: 'Get Slack or email alerts...',
+      title: 'Transcripts Feed',
+      description: 'Full speech-to-text logging of screening calls.',
       color: '#fb923c',
-    },
-    {
-      icon: Shield,
-      title: 'SOC 2 Compliant',
-      description: 'Enterprise-grade security with SOC 2 Type II...',
-      color: '#a78bfa',
-      badge: 'Enterprise',
     },
   ];
 
@@ -78,7 +65,7 @@ export default function FeaturesSection() {
             <span className="text-white/80 font-medium">Features</span>
           </div>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-            <h2 className="font-['Syne',sans-serif] text-[clamp(2rem,4vw,3rem)] font-extrabold tracking-tight text-white leading-[1.15] max-w-lg">
+            <h2 className="font-class text-[clamp(2rem,4vw,3rem)] font-extrabold tracking-tight text-white leading-[1.15] max-w-lg">
               Everything you need to <br className="hidden sm:block" />
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#6c63ff] to-[#a78bfa]">
                 hire smarter
@@ -96,7 +83,7 @@ export default function FeaturesSection() {
             <div className="inline-block px-3 py-1 rounded-full bg-[#6c63ff]/15 border border-[#6c63ff]/30 text-[#a78bfa] text-xs font-bold tracking-widest uppercase mb-4 self-start">
               Core
             </div>
-            <h3 className="font-['Syne',sans-serif] text-2xl font-extrabold text-white mb-3">
+            <h3 className="font-class text-2xl font-extrabold text-white mb-3">
               AI Voice Screening
             </h3>
             <p className="text-white/50 text-sm leading-relaxed mb-8 flex-1">
@@ -135,7 +122,7 @@ export default function FeaturesSection() {
                     </span>
                   )}
                 </div>
-                <h3 className="font-['Syne',sans-serif] text-[1.05rem] font-bold text-white mb-2 relative z-10">
+                <h3 className="font-class text-[1.05rem] font-bold text-white mb-2 relative z-10">
                   {feature.title}
                 </h3>
                 <p className="text-white/45 text-sm leading-relaxed relative z-10">

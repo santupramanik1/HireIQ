@@ -14,16 +14,22 @@ interface InterviewResultCardProps {
 
 export const InterviewResultCard = ({ candidate }: InterviewResultCardProps) => {
  
- const voiceData = candidate?.aiAnalysis?.voiceInterview || {};
+  const voiceData = candidate?.aiAnalysis?.voiceInterview || {};
+  
+  const getPercentageScore = (score: number) => {
+    if (typeof score !== 'number') return 0;
+    return score <= 10 ? score * 10 : score;
+  };
+
   const chartData = {
     labels: ['Communication', 'Technical Depth', 'Confidence'],
     datasets: [
       {
         label: 'Score Breakdown',
         data: [
-          voiceData.communicationScore || 0,
-          voiceData.technicalScore || 0,
-          voiceData.confidenceScore || 0,
+          getPercentageScore(voiceData.communicationScore),
+          getPercentageScore(voiceData.technicalScore),
+          getPercentageScore(voiceData.confidenceScore),
         ],
         // Three distinct colors for the three slices (Blue, Indigo, Purple)
         backgroundColor: [
@@ -104,7 +110,7 @@ export const InterviewResultCard = ({ candidate }: InterviewResultCardProps) => 
             {/* Overall Score Box */}
             <div className="flex flex-col items-center justify-center p-6 bg-indigo-50 rounded-xl border border-indigo-100 min-w-35">
               <span className="text-4xl font-black text-indigo-700">
-                {voiceData.overallScore || 0}%
+                {getPercentageScore(voiceData.overallScore)}%
               </span>
               <span className="text-xs text-indigo-900/60 font-semibold mt-2 uppercase tracking-wide text-center">
                 Overall<br />Performance

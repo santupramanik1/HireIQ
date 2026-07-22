@@ -19,12 +19,12 @@ export default function LoginModel() {
           <div className="w-11 h-11 rounded-xl bg-linear-to-br from-[#6c63ff] to-[#9b59b6] flex items-center justify-center shadow-[0_0_20px_rgba(108,99,255,0.4)] group-hover:shadow-[0_0_25px_rgba(108,99,255,0.6)] transition-all duration-300">
             <Mic size={22} className="text-white" />
           </div>
-          <span className="font-['Syne',sans-serif] font-extrabold text-xl text-gray-900 tracking-tight">
+          <span className="font-class font-extrabold text-xl text-gray-900 tracking-tight">
             HireIQ<span className="text-[#6c63ff]">AI</span>
           </span>
         </a>
 
-        <h1 className="font-['Syne',sans-serif] text-xl font-extrabold text-gray-900 tracking-tight mb-1">
+        <h1 className="font-class text-xl font-extrabold text-gray-900 tracking-tight mb-1">
           Welcome back
         </h1>
         <p className="text-gray-500 text-sm text-center">

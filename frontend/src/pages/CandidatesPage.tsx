@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createPortal } from 'react-dom';
+import toast from 'react-hot-toast';
 
 interface Candidate {
   applicationId: string;
@@ -10,6 +12,23 @@ interface Candidate {
   status: string;
   appliedAt: string;
 }
+
+const getStatusBadgeClass = (status: string) => {
+  switch (status?.toLowerCase()) {
+    case 'applied':
+      return 'bg-blue-50 text-blue-700 border-blue-200';
+    case 'screening':
+      return 'bg-amber-50 text-amber-700 border-amber-200';
+    case 'interviewing':
+      return 'bg-purple-50 text-purple-700 border-purple-200';
+    case 'offered':
+      return 'bg-green-50 text-green-700 border-green-200';
+    case 'rejected':
+      return 'bg-red-50 text-red-700 border-red-200';
+    default:
+      return 'bg-gray-50 text-gray-700 border-gray-200';
+  }
+};
 
 export default function CandidateTable() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
@@ -21,6 +40,26 @@ export default function CandidateTable() {
   const itemsPerPage = 5;
 
   const navigate = useNavigate();
+
+  const [candidateToDelete, setCandidateToDelete] = useState<string | null>(null);
+
+  const confirmDeleteCandidate = async (applicationId: string) => {
+    try {
+      const response = await axios.delete(
+        `${import.meta.env.VITE_API_BASE_URL}/applications/candidates/${applicationId}`,
+        { withCredentials: true }
+      );
+      if (response.data.success) {
+        setCandidates(prev => prev.filter(c => c.applicationId !== applicationId));
+        toast.success('Candidate deleted successfully.');
+      }
+    } catch (err: any) {
+      console.error('Failed to delete candidate:', err);
+      toast.error(err.response?.data?.message || 'Failed to delete candidate.');
+    } finally {
+      setCandidateToDelete(null);
+    }
+  };
 
   //   Fetch Data from API
   useEffect(() => {
@@ -111,7 +150,7 @@ export default function CandidateTable() {
 
   // Main Render (Success)
   return (
-    <div className="w-full max-w-9xl mx-auto p-4">
+    <div className="w-full max-w-9xl mx-auto p-4 page-reveal">
       {/* ---  Heading Section --- */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -145,12 +184,15 @@ export default function CandidateTable() {
                 <th scope="col" className="px-6 py-4 ">
                   Applied At
                 </th>
+                <th scope="col" className="px-6 py-4 text-right">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
               {currentCandidates.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="text-center py-8 text-gray-400 font-medium">
+                  <td colSpan={5} className="text-center py-8 text-gray-400 font-medium">
                     No candidates found.
                   </td>
                 </tr>
@@ -176,12 +218,24 @@ export default function CandidateTable() {
                     </td>
                     <td className="px-6 py-4">{c.jobId?.title || 'Unknown Position'}</td>
                     <td className="px-6 py-4">
-                      <span className="px-3 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full capitalize">
+                      <span className={`px-3 py-1 text-xs font-semibold rounded-full capitalize border shadow-sm ${getStatusBadgeClass(c.status)}`}>
                         {c.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-gray-400">
                       {new Date(c.appliedAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCandidateToDelete(c.applicationId);
+                        }}
+                        className="text-red-500 hover:text-red-700 transition-colors p-1.5 rounded-lg hover:bg-red-50 cursor-pointer inline-flex items-center"
+                        title="Delete Candidate"
+                      >
+                        <span className="material-symbols-outlined text-[20px]">delete</span>
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -235,6 +289,53 @@ export default function CandidateTable() {
           </div>
         )}
       </div>
+
+      {/* --- Custom Delete Confirmation Modal --- */}
+      {candidateToDelete && createPortal(
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300 animate-fadeIn">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl border border-gray-100 transform scale-100 transition-all duration-300 animate-scaleUp">
+            <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-600 mb-4 mx-auto">
+              <span className="material-symbols-outlined text-[28px]">warning</span>
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 text-center mb-2">Delete Candidate?</h3>
+            <p className="text-sm text-gray-500 text-center mb-6 leading-relaxed">
+              Are you sure you want to delete this candidate's application? This will permanently erase their resume analysis and interview history. This action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => setCandidateToDelete(null)}
+                className="px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 rounded-xl transition-all cursor-pointer select-none"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => confirmDeleteCandidate(candidateToDelete)}
+                className="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-xl transition-all cursor-pointer shadow-md shadow-red-200 select-none"
+              >
+                Delete Candidate
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes scaleUp {
+          from { transform: scale(0.95); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.2s ease-out forwards;
+        }
+        .animate-scaleUp {
+          animation: scaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+      `}</style>
     </div>
   );
 }

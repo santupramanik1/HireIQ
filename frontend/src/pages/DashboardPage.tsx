@@ -10,6 +10,8 @@ interface Candidate {
   status: string;
   appliedAt: string;
   finalScore?: number;
+  matchScore?: number;
+  interviewScore?: number;
 }
 
 interface Job {
@@ -104,11 +106,11 @@ export default function DashboardPage() {
   const activeJobs = jobs.filter((j) => j.status.toLowerCase() === 'active');
   const activeJobsCount = activeJobs.length;
   const totalApplicantsCount = candidates.length;
-  const completedInterviewsCount = candidates.filter((c) => c.status.toLowerCase() === 'completed').length;
+  const completedInterviewsCount = candidates.filter((c) => c.status.toLowerCase() === 'screening').length;
   
   // Calculate dynamic AI Screening Efficiency
   const autoProcessedRate = totalApplicantsCount > 0 
-    ? Math.round(((completedInterviewsCount + candidates.filter(c => c.status.toLowerCase() === 'invited').length) / totalApplicantsCount) * 100)
+    ? Math.round(((completedInterviewsCount + candidates.filter(c => c.status.toLowerCase() === 'interviewing').length) / totalApplicantsCount) * 100)
     : 74;
   const aiEfficiencyString = `${Math.max(autoProcessedRate, 74)}% automated`;
 
@@ -116,8 +118,8 @@ export default function DashboardPage() {
   const appliedCount = totalApplicantsCount;
   // Screened candidates = candidates who passed "applied" status
   const screenedCount = candidates.filter(c => c.status.toLowerCase() !== 'applied' && c.status.toLowerCase() !== 'rejected').length;
-  // Shortlisted = candidates with a match score > 70% or interviewing/completed
-  const shortlistedCount = candidates.filter(c => (c.finalScore && c.finalScore >= 70) || c.status.toLowerCase() === 'completed' || c.status.toLowerCase() === 'interviewing').length;
+  // Shortlisted = candidates with a match score >= 70%
+  const shortlistedCount = candidates.filter(c => (c.matchScore && c.matchScore >= 70) && c.status.toLowerCase() !== 'rejected').length;
   const interviewedCount = completedInterviewsCount;
   // Offered = candidates with status offered
   const offeredCount = candidates.filter(c => c.status.toLowerCase() === 'offered').length;
@@ -170,22 +172,18 @@ export default function DashboardPage() {
 
   // 4. Top Matched Candidates (Dynamic scoring)
   const topMatchedCandidates = [...candidates]
-    .map((c, index) => {
-      const score = c.finalScore || (94 - (index * 3) > 50 ? 94 - (index * 3) : 72);
-      return { ...c, matchScore: score };
-    })
-    .sort((a, b) => b.matchScore - a.matchScore)
+    .sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0))
     .slice(0, 4);
 
   // 5. AI Interview Tracker (Status-grouped lists)
-  const invitedCandidates = candidates.filter((c) => c.status.toLowerCase() === 'invited').slice(0, 3);
-  const completedCandidates = candidates.filter((c) => c.status.toLowerCase() === 'completed').slice(0, 3);
-  const inProgressCandidates = candidates.filter((c) => c.status.toLowerCase() === 'screening' || c.status.toLowerCase() === 'interviewing').slice(0, 2);
+  const invitedCandidates = candidates.filter((c) => c.status.toLowerCase() === 'interviewing').slice(0, 3);
+  const completedCandidates = candidates.filter((c) => c.status.toLowerCase() === 'screening').slice(0, 3);
+  const inProgressCandidates = candidates.filter((c) => c.status.toLowerCase() === 'interviewing').slice(0, 2);
 
   // 6. Recruiter Action Center Tasks (100% Dynamic checklist items)
   const getDynamicActionItems = () => {
     const items = [];
-    const awaitingReview = candidates.filter((c) => c.status.toLowerCase() === 'completed');
+    const awaitingReview = candidates.filter((c) => c.status.toLowerCase() === 'screening');
     if (awaitingReview.length > 0) {
       items.push({
         id: 'review-candidates',
@@ -229,9 +227,9 @@ export default function DashboardPage() {
       const date = new Date(c.appliedAt);
       let text = `${c.candidateName} submitted an application for the "${c.jobId?.title || 'Job'}" position`;
       
-      if (c.status.toLowerCase() === 'completed') {
+      if (c.status.toLowerCase() === 'screening') {
         text = `${c.candidateName} completed the automated screening interview for "${c.jobId?.title || 'Job'}"`;
-      } else if (c.status.toLowerCase() === 'invited') {
+      } else if (c.status.toLowerCase() === 'interviewing') {
         text = `AI screening interview invitation sent to ${c.candidateName}`;
       } else if (c.status.toLowerCase() === 'offered') {
         text = `Employment offer letter released for ${c.candidateName}`;
@@ -257,7 +255,7 @@ export default function DashboardPage() {
   const activityFeed = getDynamicActivityTimeline();
 
   return (
-    <div className="space-y-8 font-class pb-16">
+    <div className="space-y-8 font-class pb-16 page-reveal">
       {/* Welcome Heading */}
       <section className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -483,9 +481,9 @@ export default function DashboardPage() {
                   ) : (
                     activeJobs.slice(0, 5).map((job) => {
                       const totalApp = candidates.filter((c) => c.jobId?._id === job._id).length;
-                      const interviewedApp = candidates.filter((c) => c.jobId?._id === job._id && c.status.toLowerCase() === 'completed').length;
-                      // Mock shortlisted as a fraction
-                      const shortlistedApp = Math.round(totalApp * 0.7);
+                      const interviewedApp = candidates.filter((c) => c.jobId?._id === job._id && c.status.toLowerCase() === 'screening').length;
+                      // Shortlisted = matchScore >= 70
+                      const shortlistedApp = candidates.filter((c) => c.jobId?._id === job._id && (c.matchScore || 0) >= 70).length;
 
                       return (
                         <tr key={job._id} className="bg-white border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
