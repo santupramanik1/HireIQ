@@ -28,3 +28,6 @@ dist-ssr
 
 # Prettier
 .prettierrc
+
+# Demo Video
+public/Use_this_prompt_in_Gemini_Veo.mp4
