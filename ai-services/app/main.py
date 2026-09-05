@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 import uvicorn
@@ -8,14 +9,24 @@ from config.db_config import connect_to_mongodb
 from routers import parser
 from routers import interview_routes
 
-
-app = FastAPI()
-
 # Load env variable
 load_dotenv()
 
+PORT = int(os.getenv("PORT", 8000))
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print(f"SUCCESS: Server is running at PORT: {PORT}")
+    await connect_to_mongodb()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
+
 origins = [
-    "http://localhost:5173", 
+    "http://localhost:5173",
+    os.getenv("FRONTEND_URL", "https://hire-iq-pi.vercel.app"),
 ]
 
 app.add_middleware(
@@ -25,13 +36,6 @@ app.add_middleware(
     allow_methods=["*"],         # Allows all HTTP methods (GET, POST, PUT, DELETE, OPTIONS)
     allow_headers=["*"],         # Allows all headers
 )
-
-
-# Use the startup event
-@app.on_event("startup")
-async def startup_event():
-    print(f"SUCCESS: Server is running at PORT: {PORT}")
-    await connect_to_mongodb()
 
 
 # Global Error handler that will catch all the unhandled error here
@@ -47,7 +51,6 @@ async def global_exception_handler(request: Request, exc: Exception):
 app.include_router(parser.router, prefix="/api", tags=["Parser"])
 app.include_router(interview_routes.router, prefix="/api/interview", tags=["Interview Setup"])
 
-PORT = int(os.getenv("PORT", 8000))
 if __name__ == "__main__":
     print("Server is running at PORT :", PORT)
     uvicorn.run(

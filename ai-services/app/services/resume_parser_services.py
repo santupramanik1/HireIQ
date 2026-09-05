@@ -2,6 +2,7 @@ import httpx
 from fastapi import HTTPException
 import uuid
 import os
+import tempfile
 from langchain_community.document_loaders import PyMuPDFLoader
 from schema.parsed_resume_schema import ParsedResume
 from config.llm_config import get_llm
@@ -11,7 +12,7 @@ from langchain_core.prompts import ChatPromptTemplate
 # Parse the resume
 async def process_resume_url(url: str, job_id: str, user_id: str = None) -> dict:
 
-    local_pdf_path = f"temp_{uuid.uuid4().hex}.pdf"
+    local_pdf_path = os.path.join(tempfile.gettempdir(), f"temp_{uuid.uuid4().hex}.pdf")
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(url, timeout=15.0)
