@@ -77,7 +77,7 @@ interface HeroSectionProps {
   onWatchDemo?: () => void;
 }
 
-export default function HeroSection({ setLoginModelOpen, onWatchDemo }: HeroSectionProps) {
+export default function HeroSection({ onWatchDemo }: HeroSectionProps) {
   const navigate = useNavigate();
   return (
     <section className="relative min-h-screen flex items-center pt-32 pb-20 overflow-hidden">

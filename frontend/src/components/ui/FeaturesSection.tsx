@@ -5,10 +5,8 @@ import {
   FileSpreadsheet,
   Calendar,
   FileText,
-  Globe2,
   BarChart3,
   Zap,
-  Shield,
 } from 'lucide-react';
 
 export default function FeaturesSection() {

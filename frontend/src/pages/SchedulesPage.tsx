@@ -636,8 +636,7 @@ const formatDate = (isoString: string) => {
 // ==========================================
 export default function SchedulesPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState('All Types');
-  const [resultFilter, setResultFilter] = useState('All Results');
+  const [typeFilter] = useState('All Types');
   const [selectedResultId, setSelectedResultId] = useState<string | null>(null);
 
   const [jobs, setJobs] = useState<Job[]>([]);

@@ -6,7 +6,6 @@ import {
   Briefcase,
   MapPin,
   DollarSign,
-  ArrowLeft,
   Sparkles,
   UploadCloud,
   Mail,

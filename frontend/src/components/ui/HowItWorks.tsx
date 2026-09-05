@@ -1,7 +1,6 @@
 'use client';
 
 import { Briefcase, Bot, CalendarCheck } from 'lucide-react';
-import React from 'react';
 
 export default function HowItWorks() {
   const steps = [

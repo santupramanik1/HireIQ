@@ -867,7 +867,7 @@ export default function GenerateQuestionsPage() {
   
   // Form State
   const [selectedJobId, setSelectedJobId] = useState('');
-  const [jobTitle, setJobTitle] = useState('');
+  const [, setJobTitle] = useState('');
   const [jobDescription, setJobDescription] = useState('');
   const [duration, setDuration] = useState('30');
   

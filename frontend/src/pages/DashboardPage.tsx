@@ -168,7 +168,6 @@ export default function DashboardPage() {
   });
 
   const linePath = chartPoints.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x},${p.y}`).join(' ');
-  const areaPath = `${linePath} L 650,150 L 50,150 Z`;
 
   // 4. Top Matched Candidates (Dynamic scoring)
   const topMatchedCandidates = [...candidates]
@@ -540,7 +539,7 @@ export default function DashboardPage() {
               {topMatchedCandidates.length === 0 ? (
                 <p className="text-xs text-slate-400">No matching evaluations available.</p>
               ) : (
-                topMatchedCandidates.map((cand, idx) => (
+                topMatchedCandidates.map((cand) => (
                   <div
                     key={cand.applicationId}
                     onClick={() => navigate(`/dashboard/candidate-info/${cand.applicationId}`)}
