@@ -1,4 +1,4 @@
-<!doctype html>
+export const interviewInviteTemplate = `<!doctype html>
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -103,3 +103,4 @@
     </div>
   </body>
 </html>
+`;

@@ -58,17 +58,13 @@
 
 
 import { BrevoClient } from '@getbrevo/brevo';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { interviewInviteTemplate } from '../../templates/interview-invite.template.js';
+import { applicationConfirmationTemplate } from '../../templates/application-confirmation.template.js';
 
 // 1. Initialize Brevo Client
 const brevo = new BrevoClient({
-  apiKey: process.env.BREVO_API_KEY as string, 
+  apiKey: process.env.BREVO_API_KEY as string,
 });
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 interface EmailInviteParams {
   to: string;
@@ -80,13 +76,7 @@ interface EmailInviteParams {
 
 export const sendInterviewInviteEmail = async (params: EmailInviteParams): Promise<any> => {
   try {
-    const templatePath = path.join(
-      process.cwd(),
-      'src',
-      'templates',
-      'interview-invite.html'
-    );
-    let htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
+    let htmlTemplate = interviewInviteTemplate;
 
     // Replace placeholders
     htmlTemplate = htmlTemplate.replace(
@@ -132,13 +122,7 @@ interface ApplicationConfirmationParams {
 
 export const sendApplicationConfirmationEmail = async (params: ApplicationConfirmationParams): Promise<any> => {
   try {
-    const templatePath = path.join(
-      process.cwd(),
-      'src',
-      'templates',
-      'application-confirmation.html'
-    );
-    let htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
+    let htmlTemplate = applicationConfirmationTemplate;
 
     // Replace placeholders
     htmlTemplate = htmlTemplate.replace(
