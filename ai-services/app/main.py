@@ -1,8 +1,15 @@
+import sys
+import os
+
+# Vercel imports this file as "app.main" without adding this file's own
+# directory to sys.path, so the bare sibling imports below (config, models,
+# routers, schema, services, utils) would otherwise fail to resolve.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 import uvicorn
-import os
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from config.db_config import connect_to_mongodb
