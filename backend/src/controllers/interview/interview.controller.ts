@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express';
+import axios from 'axios';
 import { Interview } from '../../models/interview/interview.model.js';
 import { Application } from '../../models/application/application.model.js';
 import { sendInterviewInviteEmail } from '../email/email.controller.js';
@@ -439,6 +440,72 @@ export const getInterviewById = async (req: Request, res: Response) => {
       success: false,
       message: 'Failed to fetch interview details',
       error: error.message
+    });
+  }
+};
+
+/**
+ * @desc    Proxy: generate AI interview questions via the ai-services FastAPI backend
+ * @route   POST /api/interviews/generate-questions
+ * @access  Private (Recruiter)
+ *
+ * The browser cannot call ai-services directly with credentials: access_token
+ * is an httpOnly cookie scoped to this backend's own origin, so it never
+ * reaches a different origin (ai-services runs on a separate domain). This
+ * backend already holds that cookie on this same request, so it re-attaches
+ * it as a Bearer token when forwarding the call server-to-server.
+ */
+export const generateInterviewQuestions = async (req: Request, res: Response) => {
+  try {
+    const pythonServiceUrl =
+      process.env.PYTHON_SERVICE_URL || 'http://localhost:7000';
+    const token = req.cookies.access_token;
+
+    const aiResponse = await axios.post(
+      `${pythonServiceUrl}/interview/setup`,
+      req.body,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    return res.status(200).json(aiResponse.data);
+  } catch (error: any) {
+    console.error('Interview Question Generation Error:', error);
+    if (error.response) {
+      return res.status(error.response.status).json(error.response.data);
+    }
+    return res.status(503).json({
+      success: false,
+      message: 'Our AI service is currently unavailable. Please try again in a few minutes.',
+    });
+  }
+};
+
+/**
+ * @desc    Proxy: save the finalized interview setup via the ai-services FastAPI backend
+ * @route   POST /api/interviews/save-setup
+ * @access  Private (Recruiter)
+ */
+export const saveInterviewSetup = async (req: Request, res: Response) => {
+  try {
+    const pythonServiceUrl =
+      process.env.PYTHON_SERVICE_URL || 'http://localhost:7000';
+    const token = req.cookies.access_token;
+
+    const aiResponse = await axios.post(
+      `${pythonServiceUrl}/interview/save`,
+      req.body,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    return res.status(200).json(aiResponse.data);
+  } catch (error: any) {
+    console.error('Interview Setup Save Error:', error);
+    if (error.response) {
+      return res.status(error.response.status).json(error.response.data);
+    }
+    return res.status(503).json({
+      success: false,
+      message: 'Our AI service is currently unavailable. Please try again in a few minutes.',
     });
   }
 };

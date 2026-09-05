@@ -978,7 +978,7 @@ export default function GenerateQuestionsPage() {
       };
 
       const response = await axios.post(
-        `${import.meta.env.VITE_AI_API_BASE_URL || 'http://localhost:7000'}/api/interview/setup`,
+        `${import.meta.env.VITE_API_BASE_URL}/interviews/generate-questions`,
         payload,
         {
           headers: {
@@ -1013,7 +1013,7 @@ export default function GenerateQuestionsPage() {
       };
 
       const response = await axios.post(
-        `${import.meta.env.VITE_AI_API_BASE_URL || 'http://localhost:7000'}/api/interview/save`,
+        `${import.meta.env.VITE_API_BASE_URL}/interviews/save-setup`,
         payload,
         {
           headers: {
