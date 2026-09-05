@@ -48,6 +48,11 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
+@app.get("/", tags=["Health"])
+async def health_check():
+    return {"status": "ok"}
+
+
 app.include_router(parser.router, prefix="/api", tags=["Parser"])
 app.include_router(interview_routes.router, prefix="/api/interview", tags=["Interview Setup"])
 
